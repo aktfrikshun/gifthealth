@@ -100,7 +100,7 @@ Orchestrates the event processing and report generation. Contains the core busin
 - **Patient Storage**: Uses a hash keyed by patient name for O(1) patient lookup.
 - **Report Generation**: Filters out patients with no created prescriptions before generating the report, ensuring only relevant patients appear in the output.
 - **Sorting**: Sorts patients by fill count (descending), then by income (ascending) to match the expected output format from requirements.
-  - **Note**: The sorting order was determined by analyzing the expected output in REQUIREMENTS.md, which differs from alphabetical sorting. The pattern prioritizes patients with more fills, then groups by income within the same fill count.
+  - **Note**: The sorting order was determined by analyzing the expected output in REQUIREMENTS.md. The pattern prioritizes patients with more fills, then groups by income within the same fill count.
 
 **Data Structures:**
 - Hash of patients keyed by patient name
@@ -264,7 +264,7 @@ These validations ensure data integrity and prevent invalid states from being cr
 3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions. **Question for product owner: Should we report on patients with events for missing prescriptions?
 
 4. **Sorting**: Patients are sorted by fill count (descending), then by income (ascending) to match the expected output format from requirements.
-   - **Observation**: The expected output in REQUIREMENTS.md does not match alphabetical sorting. Analysis of the sample output revealed the sorting pattern.
+   - **Observation**: Analysis of the expected output in REQUIREMENTS.md revealed a sorting pattern that prioritizes fill count, then income.
    - **Assumption**: The desired sort order is fill count descending (patients with more fills appear first), then income ascending (among patients with the same fill count, those with lower income appear first). This prioritizes patients with more activity while grouping those with similar fill counts by income.
 
 5. **Relationship Integrity**: Prescriptions maintain a bidirectional relationship with patients, ensuring data consistency throughout the system.
