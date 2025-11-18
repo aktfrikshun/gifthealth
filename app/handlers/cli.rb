@@ -24,12 +24,10 @@ class CLI
   private
 
   def determine_input_source(args)
-    if args.empty?
-      $stdin
-    else
-      filename = args.first
-      File.open(filename, 'r')
-    end
+    return $stdin if args.empty?
+
+    filename = args.first
+    File.open(filename, 'r')
   rescue Errno::ENOENT
     warn "Error: File '#{filename}' not found"
     exit 1
