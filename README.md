@@ -248,7 +248,24 @@ If this were to be extended, potential improvements could include:
 4. **Performance**: Performance tests show the system can handle 200,000+ events per second. For very large files (millions of events), consider streaming processing
 5. **Validation**: More robust input validation and error handling
 6. **Output Formats**: Support for JSON, CSV, or other output formats
-7. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
+7. **Event Persistence & Change Tracking**: Add event history and audit capabilities:
+   - **Event Storage**: Persist all prescription events to a database (e.g., PostgreSQL, DynamoDB) for historical tracking
+   - **Change Tracking**: Implement event sourcing or audit logging to track:
+     - When events were processed
+     - Who/what system created each event
+     - Full event history for each prescription
+     - Ability to replay events for debugging or reprocessing
+   - **Event History Viewing**: Provide APIs and UI to:
+     - View complete event timeline for a prescription
+     - Query events by patient, drug, date range, or event type
+     - Track state changes over time
+     - Generate audit reports
+   - **Benefits**:
+     - Complete audit trail for compliance
+     - Ability to debug issues by reviewing event history
+     - Support for event replay and reprocessing
+     - Historical analysis and reporting capabilities
+8. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
    - **Web Interface**: RESTful API and web UI for receiving input via file uploads or direct API calls
    - **Event Ingestion**: Use AWS SQS (Simple Queue Service) for asynchronous event ingestion, enabling:
      - Decoupled architecture with producers and consumers
