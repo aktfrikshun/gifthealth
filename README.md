@@ -197,9 +197,7 @@ spec/
   │   └── sample_input.txt      # Sample input file for testing
   ├── models/
   │   ├── prescription_spec.rb
-  │   ├── patient_spec.rb
-  │   ├── prescription_factory_spec.rb    # Factory tests with property-based testing
-  │   └── patient_factory_spec.rb         # Factory tests
+  │   └── patient_spec.rb
   ├── services/
   │   └── prescription_event_processor_spec.rb
   ├── handlers/
