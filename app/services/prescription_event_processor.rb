@@ -29,9 +29,9 @@ class PrescriptionEventProcessor
     stripped_line = line.strip
     return if stripped_line.empty?
 
-    parts = stripped_line.split(/\s+/, 3)
+    parts = stripped_line.split(/\s+/)
 
-    unless parts.length == 3 && !parts[2].include?(' ')
+    unless parts.length == 3
       abort "Error: Invalid input format. Expected 'PatientName DrugName EventName', got: #{line.inspect}"
     end
 
