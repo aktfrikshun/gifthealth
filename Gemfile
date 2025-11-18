@@ -8,6 +8,7 @@ ruby "~> 3.4.0"
 gem "rspec", "~> 3.12"
 gem "factory_bot", "~> 6.4"
 gem "faker", "~> 3.4"
+gem "benchmark"
 
 # Code quality (optional)
 gem "rubocop", "~> 1.57", require: false
