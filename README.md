@@ -20,10 +20,10 @@ The application accepts input either via a filename argument or via stdin:
 
 ```bash
 # Using a filename
-./bin/prescription_processor sample_input.txt
+./bin/prescription_processor spec/fixtures/sample_input.txt
 
 # Using stdin
-cat sample_input.txt | ./bin/prescription_processor
+cat spec/fixtures/sample_input.txt | ./bin/prescription_processor
 ```
 
 ## Running Tests
