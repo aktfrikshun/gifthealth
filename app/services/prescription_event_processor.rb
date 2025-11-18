@@ -27,6 +27,8 @@ class PrescriptionEventProcessor
 
   def process_line(line)
     stripped_line = line.strip
+    return if stripped_line.empty?
+
     parts = stripped_line.split(/\s+/, 3)
 
     unless parts.length == 3 && !parts[2].include?(' ')

@@ -51,11 +51,17 @@ RSpec.describe PrescriptionEventProcessor do
       expect(report).to include('John: 1 fills $5 income')
     end
 
-    it 'aborts with error message for invalid lines' do
-      expect { processor.process_line('') }.to raise_error(SystemExit) do |error|
+    it 'skips empty lines' do
+      processor.process_line('')
+      processor.process_line('   ')
+      report = processor.generate_report
+      expect(report).to be_empty
+    end
+
+    it 'aborts with error message for invalid non-empty lines' do
+      expect { processor.process_line('only one') }.to raise_error(SystemExit) do |error|
         expect(error.status).to eq(1)
       end
-      expect { processor.process_line('only one') }.to raise_error(SystemExit)
       expect { processor.process_line('only two') }.to raise_error(SystemExit)
       expect { processor.process_line('one two three four') }.to raise_error(SystemExit)
     end
