@@ -258,9 +258,9 @@ If this were to be extended, potential improvements could include:
      - More accurate financial reporting per drug type
      - Ability to model complex pricing scenarios (insurance tiers, discounts, etc.)
 5. **Performance**: Performance tests show the system can handle 200,000+ events per second. For very large files (millions of events), consider streaming processing
-5. **Validation**: More robust input validation and error handling
-6. **Output Formats**: Support for JSON, CSV, or other output formats
-7. **Event Persistence & Change Tracking**: Add event history and audit capabilities:
+6. **Validation**: More robust input validation and error handling
+7. **Output Formats**: Support for JSON, CSV, or other output formats
+8. **Event Persistence & Change Tracking**: Add event history and audit capabilities:
    - **Event Storage**: Persist all prescription events to a database (e.g., PostgreSQL, DynamoDB) for historical tracking
    - **Change Tracking**: Implement event sourcing or audit logging to track:
      - When events were processed
@@ -277,7 +277,7 @@ If this were to be extended, potential improvements could include:
      - Ability to debug issues by reviewing event history
      - Support for event replay and reprocessing
      - Historical analysis and reporting capabilities
-8. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
+9. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
    - **Web Interface**: RESTful API and web UI for receiving input via file uploads or direct API calls
    - **Event Ingestion**: Use AWS SQS (Simple Queue Service) for asynchronous event ingestion, enabling:
      - Decoupled architecture with producers and consumers
