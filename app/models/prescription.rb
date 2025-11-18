@@ -28,7 +28,6 @@ class Prescription
     @created = true
   end
 
-  # rubocop:disable Naming/PredicateMethod
   def fill
     return false unless @created
 
@@ -43,7 +42,6 @@ class Prescription
     @return_count += 1
     true
   end
-  # rubocop:enable Naming/PredicateMethod
 
   def net_fills
     @fill_count - @return_count
