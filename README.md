@@ -33,7 +33,7 @@ cat spec/fixtures/sample_input.txt | ./bin/prescription_processor
 bundle exec rspec
 
 # Run specific test files
-bundle exec rspec spec/prescription_spec.rb
+bundle exec rspec spec/models/prescription_spec.rb
 bundle exec rspec spec/performance_spec.rb
 
 # Run with documentation format
@@ -195,13 +195,16 @@ spec/
   │   └── patients.rb           # FactoryBot factories for patients
   ├── fixtures/
   │   └── sample_input.txt      # Sample input file for testing
-  ├── prescription_spec.rb
-  ├── patient_spec.rb
-  ├── prescription_event_processor_spec.rb
-  ├── prescription_factory_spec.rb    # Factory tests with property-based testing
-  ├── patient_factory_spec.rb         # Factory tests
+  ├── models/
+  │   ├── prescription_spec.rb
+  │   ├── patient_spec.rb
+  │   ├── prescription_factory_spec.rb    # Factory tests with property-based testing
+  │   └── patient_factory_spec.rb         # Factory tests
+  ├── services/
+  │   └── prescription_event_processor_spec.rb
+  ├── handlers/
+  │   └── cli_spec.rb
   ├── performance_spec.rb             # Load and performance tests
-  ├── cli_spec.rb
   └── integration_spec.rb
 
 bin/
