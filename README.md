@@ -44,37 +44,7 @@ bundle exec rspec --format documentation
 
 ### Overview
 
-The solution is organized into a clean, object-oriented architecture with clear separation of concerns. The design follows SOLID principles and emphasizes testability and maintainability.
-
-### SOLID Principles
-
-The codebase demonstrates adherence to SOLID principles:
-
-1. **Single Responsibility Principle (SRP)**: Each class has one clear responsibility:
-   - `Prescription`: Manages a single prescription's state and income calculation
-   - `Patient`: Aggregates prescriptions and calculates patient-level statistics
-   - `PrescriptionEventProcessor`: Orchestrates event processing and report generation
-   - `CLI`: Handles command-line input/output
-
-2. **Open/Closed Principle (OCP)**: The design is open for extension but closed for modification:
-   - New event types can be added by extending `process_event` without modifying existing logic
-   - New output formats can be added without changing core processing logic
-   - New input sources (web API, message queues) can be added without modifying the service layer
-
-3. **Liskov Substitution Principle (LSP)**: Subtypes are substitutable for their base types:
-   - Any `Prescription` instance can be used interchangeably
-   - Any `Patient` instance can be used interchangeably
-   - Models maintain consistent interfaces that can be swapped without breaking dependents
-
-4. **Interface Segregation Principle (ISP)**: Clients depend only on methods they use:
-   - `PrescriptionEventProcessor` only uses the methods it needs from `Patient` and `Prescription`
-   - `CLI` depends only on `PrescriptionEventProcessor`'s public interface
-   - Models expose focused, cohesive interfaces rather than bloated APIs
-
-5. **Dependency Inversion Principle (DIP)**: Depend on abstractions, not concretions:
-   - `PrescriptionEventProcessor` depends on `Patient` and `Prescription` abstractions, not implementations
-   - `CLI` depends on `PrescriptionEventProcessor` abstraction
-   - High-level modules don't depend on low-level modules; both depend on abstractions
+The solution is organized into a clean, object-oriented architecture with clear separation of concerns. The design follows SOLID principles and emphasizes testability and maintainability. See `documents/SOLID_PRINCIPLES.md` for detailed documentation on how SOLID principles are applied in this codebase.
 
 ### Core Components
 
