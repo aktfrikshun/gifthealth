@@ -46,7 +46,7 @@ class PrescriptionEventProcessor
   def generate_report
     @patients.values
              .select(&:has_created_prescriptions?)
-             .sort_by(&:name)
+             .sort_by { |patient| [-patient.total_fills, patient.total_income] }
              .map { |patient| format_report_line(patient) }
   end
 

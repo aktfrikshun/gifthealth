@@ -99,7 +99,7 @@ Orchestrates the event processing and report generation. Contains the core busin
 - **Event Processing**: Separates line parsing (`process_line`) from event handling (`process_event`), making the code more testable and allowing for easy extension to other input formats.
 - **Patient Storage**: Uses a hash keyed by patient name for O(1) patient lookup.
 - **Report Generation**: Filters out patients with no created prescriptions before generating the report, ensuring only relevant patients appear in the output.
-- **Sorting**: Sorts patients alphabetically by name for consistent, predictable output.
+- **Sorting**: Sorts patients by fill count (descending), then by income (ascending) to match the expected output format from requirements.
 
 **Data Structures:**
 - Hash of patients keyed by patient name
@@ -262,7 +262,7 @@ These validations ensure data integrity and prevent invalid states from being cr
 
 3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions. **Question for product owner: Should we report on patients with events for missing prescriptions?
 
-4. **Sorting**: Patients are sorted alphabetically by name for consistent output ordering.
+4. **Sorting**: Patients are sorted by fill count (descending), then by income (ascending) to match the expected output format from requirements.
 
 5. **Relationship Integrity**: Prescriptions maintain a bidirectional relationship with patients, ensuring data consistency throughout the system.
 

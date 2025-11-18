@@ -75,14 +75,27 @@ RSpec.describe PrescriptionEventProcessor do
   end
 
   describe '#generate_report' do
-    it 'sorts patients alphabetically' do
-      processor.process_line('Zebra A created')
-      processor.process_line('Alice B created')
-      processor.process_line('Bob C created')
+    it 'sorts patients by fill count descending, then income ascending' do
+      processor.process_line('Alice A created')
+      processor.process_line('Alice A filled')
+      processor.process_line('Alice A filled') # Alice: 2 fills, $10 income
+
+      processor.process_line('Bob B created')
+      processor.process_line('Bob B filled') # Bob: 1 fill, $5 income
+
+      processor.process_line('Charlie C created') # Charlie: 0 fills, $0 income
+
+      processor.process_line('David D created')
+      processor.process_line('David D filled')
+      processor.process_line('David D returned') # David: 0 fills, -$1 income
+
       report = processor.generate_report
-      expect(report[0]).to include('Alice')
-      expect(report[1]).to include('Bob')
-      expect(report[2]).to include('Zebra')
+
+      # Should be sorted: fills desc, then income asc
+      expect(report[0]).to include('Alice') # 2 fills (highest)
+      expect(report[1]).to include('Bob')   # 1 fill
+      expect(report[2]).to include('David')  # 0 fills, -$1 (lower income)
+      expect(report[3]).to include('Charlie') # 0 fills, $0 (higher income)
     end
 
     it 'matches expected output format from requirements' do
