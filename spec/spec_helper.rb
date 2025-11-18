@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "../lib/prescription"
-require_relative "../lib/patient"
-require_relative "../lib/prescription_event_processor"
-require_relative "../lib/cli"
+require_relative "../app/models/prescription"
+require_relative "../app/models/patient"
+require_relative "../app/services/prescription_event_processor"
+require_relative "../app/handlers/cli"
 require "factory_bot"
 require "faker"
 

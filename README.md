@@ -161,12 +161,17 @@ The test suite is organized to mirror the code structure and includes comprehens
 
 ### Code Organization
 
+The codebase follows an MVC-like architecture, organized into clear layers:
+
 ```
-lib/
-  ├── prescription.rb              # Core domain object
-  ├── patient.rb                   # Patient aggregation
-  ├── prescription_event_processor.rb  # Event processing orchestration
-  └── cli.rb                       # Command-line interface
+app/
+  ├── models/
+  │   ├── prescription.rb              # Core domain object - prescription state
+  │   └── patient.rb                   # Patient aggregation model
+  ├── services/
+  │   └── prescription_event_processor.rb  # Business logic - event processing
+  └── handlers/
+      └── cli.rb                       # Interface layer - command-line handler
 
 spec/
   ├── spec_helper.rb
@@ -187,6 +192,13 @@ spec/
 bin/
   └── prescription_processor       # Executable entry point
 ```
+
+**Architecture Layers:**
+- **Models** (`app/models/`): Domain objects representing business entities (Prescription, Patient)
+- **Services** (`app/services/`): Business logic and orchestration (PrescriptionEventProcessor)
+- **Handlers** (`app/handlers/`): Interface adapters for different input/output mechanisms (CLI, future API handlers, etc.)
+
+This structure makes it easy to add new interfaces (web API, message queue consumers, etc.) without modifying core business logic.
 
 ### Assumptions Made
 

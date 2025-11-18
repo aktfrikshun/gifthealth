@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "prescription"
+
 # Tracks all prescriptions and aggregate statistics for a patient
 class Patient
   attr_reader :name

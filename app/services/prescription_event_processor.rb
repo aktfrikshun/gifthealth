@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "patient"
-require_relative "prescription"
+require_relative "../models/patient"
+require_relative "../models/prescription"
 
 # Processes prescription events and generates reports
 class PrescriptionEventProcessor
