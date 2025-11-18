@@ -46,6 +46,8 @@ bundle exec rspec --format documentation
 
 The solution is organized into a clean, object-oriented architecture with clear separation of concerns. The design follows SOLID principles and emphasizes testability and maintainability. See `documents/SOLID_PRINCIPLES.md` for detailed documentation on how SOLID principles are applied in this codebase.
 
+For information on technology choices and why Ruby with Bundler was selected (without Rails), see `documents/TECHNOLOGY_CHOICES.md`.
+
 ### Core Components
 
 #### 1. `Prescription` Model (`app/models/prescription.rb`)
