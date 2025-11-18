@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../services/prescription_event_processor"
+require_relative '../services/prescription_event_processor'
 
 # Command-line interface for the prescription event processor
 class CLI
@@ -28,11 +28,10 @@ class CLI
       $stdin
     else
       filename = args.first
-      File.open(filename, "r")
+      File.open(filename, 'r')
     end
   rescue Errno::ENOENT
-    $stderr.puts "Error: File '#{filename}' not found"
+    warn "Error: File '#{filename}' not found"
     exit 1
   end
 end
-

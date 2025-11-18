@@ -1,35 +1,35 @@
 # frozen_string_literal: true
 
-require "spec_helper"
+require 'spec_helper'
 
 RSpec.describe Prescription do
-  let(:patient) { Patient.new("John") }
-  let(:prescription) { Prescription.new(patient: patient, drug_name: "A") }
+  let(:patient) { Patient.new('John') }
+  let(:prescription) { Prescription.new(patient: patient, drug_name: 'A') }
 
-  describe "#created?" do
-    it "returns false initially" do
+  describe '#created?' do
+    it 'returns false initially' do
       expect(prescription.created?).to be false
     end
 
-    it "returns true after marking as created" do
+    it 'returns true after marking as created' do
       prescription.mark_created
       expect(prescription.created?).to be true
     end
   end
 
-  describe "#fill" do
-    it "returns false if prescription is not created" do
+  describe '#fill' do
+    it 'returns false if prescription is not created' do
       expect(prescription.fill).to be false
       expect(prescription.net_fills).to eq(0)
     end
 
-    it "increments fill count after creation" do
+    it 'increments fill count after creation' do
       prescription.mark_created
       expect(prescription.fill).to be true
       expect(prescription.net_fills).to eq(1)
     end
 
-    it "allows multiple fills" do
+    it 'allows multiple fills' do
       prescription.mark_created
       prescription.fill
       prescription.fill
@@ -37,17 +37,17 @@ RSpec.describe Prescription do
     end
   end
 
-  describe "#return_fill" do
-    it "returns false if prescription is not created" do
+  describe '#return_fill' do
+    it 'returns false if prescription is not created' do
       expect(prescription.return_fill).to be false
     end
 
-    it "returns false if there are no fills to return" do
+    it 'returns false if there are no fills to return' do
       prescription.mark_created
       expect(prescription.return_fill).to be false
     end
 
-    it "decrements net fills when returning" do
+    it 'decrements net fills when returning' do
       prescription.mark_created
       prescription.fill
       prescription.fill
@@ -55,7 +55,7 @@ RSpec.describe Prescription do
       expect(prescription.net_fills).to eq(1)
     end
 
-    it "cannot return more than filled" do
+    it 'cannot return more than filled' do
       prescription.mark_created
       prescription.fill
       prescription.return_fill
@@ -64,12 +64,12 @@ RSpec.describe Prescription do
     end
   end
 
-  describe "#income" do
-    it "returns 0 for uncreated prescription" do
+  describe '#income' do
+    it 'returns 0 for uncreated prescription' do
       expect(prescription.income).to eq(0)
     end
 
-    it "returns $5 per net fill" do
+    it 'returns $5 per net fill' do
       prescription.mark_created
       prescription.fill
       expect(prescription.income).to eq(5) # 1 net fill * 5 - 0 returns * 1
@@ -77,7 +77,7 @@ RSpec.describe Prescription do
       expect(prescription.income).to eq(10) # 2 net fills * 5 - 0 returns * 1
     end
 
-    it "calculates income correctly with returns (return cancels fill income + $1 penalty)" do
+    it 'calculates income correctly with returns (return cancels fill income + $1 penalty)' do
       prescription.mark_created
       prescription.fill
       prescription.fill
@@ -87,7 +87,7 @@ RSpec.describe Prescription do
       expect(prescription.income).to eq(4)
     end
 
-    it "calculates negative income correctly with multiple returns" do
+    it 'calculates negative income correctly with multiple returns' do
       prescription.mark_created
       prescription.fill
       prescription.return_fill
@@ -99,37 +99,45 @@ RSpec.describe Prescription do
     end
   end
 
-  describe "validations" do
-    it "raises error when patient is nil" do
-      expect { Prescription.new(patient: nil, drug_name: "A") }.to raise_error(ArgumentError, "patient cannot be nil")
+  describe 'validations' do
+    it 'raises error when patient is nil' do
+      expect { Prescription.new(patient: nil, drug_name: 'A') }.to raise_error(ArgumentError, 'patient cannot be nil')
     end
 
-    it "raises error when patient is not a Patient instance" do
-      expect { Prescription.new(patient: "not a patient", drug_name: "A") }.to raise_error(ArgumentError, "patient must be an instance of Patient")
+    it 'raises error when patient is not a Patient instance' do
+      expect do
+        Prescription.new(patient: 'not a patient',
+                         drug_name: 'A')
+      end.to raise_error(ArgumentError, 'patient must be an instance of Patient')
     end
 
-    it "raises error when drug_name is nil" do
-      expect { Prescription.new(patient: patient, drug_name: nil) }.to raise_error(ArgumentError, "drug_name cannot be nil")
+    it 'raises error when drug_name is nil' do
+      expect do
+        Prescription.new(patient: patient, drug_name: nil)
+      end.to raise_error(ArgumentError, 'drug_name cannot be nil')
     end
 
-    it "raises error when drug_name is empty" do
-      expect { Prescription.new(patient: patient, drug_name: "") }.to raise_error(ArgumentError, "drug_name cannot be empty")
+    it 'raises error when drug_name is empty' do
+      expect do
+        Prescription.new(patient: patient, drug_name: '')
+      end.to raise_error(ArgumentError, 'drug_name cannot be empty')
     end
 
-    it "raises error when drug_name is only whitespace" do
-      expect { Prescription.new(patient: patient, drug_name: "   ") }.to raise_error(ArgumentError, "drug_name cannot be empty")
+    it 'raises error when drug_name is only whitespace' do
+      expect do
+        Prescription.new(patient: patient, drug_name: '   ')
+      end.to raise_error(ArgumentError, 'drug_name cannot be empty')
     end
   end
 
-  describe "relationships" do
-    it "belongs to a patient" do
+  describe 'relationships' do
+    it 'belongs to a patient' do
       expect(prescription.patient).to eq(patient)
-      expect(prescription.patient.name).to eq("John")
+      expect(prescription.patient.name).to eq('John')
     end
 
-    it "returns patient_name from patient" do
-      expect(prescription.patient_name).to eq("John")
+    it 'returns patient_name from patient' do
+      expect(prescription.patient_name).to eq('John')
     end
   end
 end
-

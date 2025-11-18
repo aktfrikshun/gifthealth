@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 FactoryBot.define do
   factory :patient, class: Patient do
     name { Faker::Name.first_name }
@@ -44,11 +42,11 @@ FactoryBot.define do
             break name unless used_drug_names.include?(name)
           end
           used_drug_names.add(drug_name)
-          prescription = build(:prescription, :with_fills, patient: patient, drug_name: drug_name, fill_count: evaluator.fill_count)
+          prescription = build(:prescription, :with_fills, patient: patient, drug_name: drug_name,
+                                                           fill_count: evaluator.fill_count)
           patient.instance_variable_get(:@prescriptions)[drug_name] = prescription
         end
       end
     end
   end
 end
-

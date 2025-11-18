@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "prescription"
+require_relative 'prescription'
 
 # Tracks all prescriptions and aggregate statistics for a patient
 # Has many Prescriptions (has_many :prescriptions)
@@ -49,13 +49,13 @@ class Patient
   private
 
   def validate_name!(name)
-    raise ArgumentError, "name cannot be nil" if name.nil?
-    raise ArgumentError, "name cannot be empty" if name.to_s.strip.empty?
+    raise ArgumentError, 'name cannot be nil' if name.nil?
+    raise ArgumentError, 'name cannot be empty' if name.to_s.strip.empty?
   end
 
   def validate_prescription_belongs_to_patient!(prescription)
-    unless prescription.patient == self
-      raise ArgumentError, "Prescription patient '#{prescription.patient.name}' does not match Patient name '#{@name}'"
-    end
+    return if prescription.patient == self
+
+    raise ArgumentError, "Prescription patient '#{prescription.patient.name}' does not match Patient name '#{@name}'"
   end
 end

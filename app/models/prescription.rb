@@ -28,6 +28,7 @@ class Prescription
     @created = true
   end
 
+  # rubocop:disable Naming/PredicateMethod
   def fill
     return false unless @created
 
@@ -42,6 +43,7 @@ class Prescription
     @return_count += 1
     true
   end
+  # rubocop:enable Naming/PredicateMethod
 
   def net_fills
     @fill_count - @return_count
@@ -58,12 +60,12 @@ class Prescription
   private
 
   def validate_patient!(patient)
-    raise ArgumentError, "patient cannot be nil" if patient.nil?
-    raise ArgumentError, "patient must be an instance of Patient" unless patient.is_a?(Patient)
+    raise ArgumentError, 'patient cannot be nil' if patient.nil?
+    raise ArgumentError, 'patient must be an instance of Patient' unless patient.is_a?(Patient)
   end
 
   def validate_drug_name!(drug_name)
-    raise ArgumentError, "drug_name cannot be nil" if drug_name.nil?
-    raise ArgumentError, "drug_name cannot be empty" if drug_name.to_s.strip.empty?
+    raise ArgumentError, 'drug_name cannot be nil' if drug_name.nil?
+    raise ArgumentError, 'drug_name cannot be empty' if drug_name.to_s.strip.empty?
   end
 end

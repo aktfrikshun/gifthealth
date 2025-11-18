@@ -48,34 +48,43 @@ The solution is organized into a clean, object-oriented architecture with clear 
 
 ### Core Components
 
-#### 1. `Prescription` Class (`lib/prescription.rb`)
+#### 1. `Prescription` Model (`app/models/prescription.rb`)
 
 Represents a single prescription and tracks its state. This is the core domain object that encapsulates the business rules for prescription lifecycle.
 
 **Key Design Decisions:**
+- **Relationships**: Belongs to a Patient (has_one patient). Maintains a reference to the patient object rather than just storing the patient name.
 - **State Management**: Uses simple instance variables (`@created`, `@fill_count`, `@return_count`) rather than a state machine. This keeps the implementation simple while still being clear and maintainable.
-- **Validation**: Methods return `true`/`false` to indicate success, allowing callers to handle invalid operations gracefully.
+- **Validations**: 
+  - Patient must be present and an instance of Patient
+  - Drug name must be present and not empty
+  - Raises `ArgumentError` with descriptive messages for invalid input
 - **Income Calculation**: The income formula is `(net_fills * 5) - (return_count * 1)`. This reflects that returns cancel out the income from a fill (hence using `net_fills` which is `fill_count - return_count`) and also incur a $1 penalty per return.
 
 **Data Structures:**
+- Reference to Patient object
 - Simple integer counters for fills and returns
 - Boolean flag for creation state
 
-#### 2. `Patient` Class (`lib/patient.rb`)
+#### 2. `Patient` Model (`app/models/patient.rb`)
 
 Aggregates multiple prescriptions for a single patient and provides aggregate statistics.
 
 **Key Design Decisions:**
+- **Relationships**: Has many Prescriptions (has_many :prescriptions). Manages prescriptions through a hash keyed by drug name.
 - **Prescription Storage**: Uses a hash keyed by drug name (`@prescriptions[drug_name]`) for O(1) lookup when processing events. This is efficient since we need to look up prescriptions frequently during event processing.
 - **Lazy Creation**: Prescriptions are created on-demand via `get_or_create_prescription`, which simplifies the event processing logic.
+- **Validations**:
+  - Name must be present and not empty
+  - When adding prescriptions via `add_prescription`, validates that the prescription belongs to this patient
 - **Aggregation**: Provides `total_fills` and `total_income` methods that sum across all prescriptions, keeping the aggregation logic encapsulated.
 
 **Data Structures:**
 - Hash of prescriptions keyed by drug name
 
-#### 3. `PrescriptionEventProcessor` Class (`lib/prescription_event_processor.rb`)
+#### 3. `PrescriptionEventProcessor` Service (`app/services/prescription_event_processor.rb`)
 
-Orchestrates the event processing and report generation.
+Orchestrates the event processing and report generation. Contains the core business logic.
 
 **Key Design Decisions:**
 - **Event Processing**: Separates line parsing (`process_line`) from event handling (`process_event`), making the code more testable and allowing for easy extension to other input formats.
@@ -86,13 +95,13 @@ Orchestrates the event processing and report generation.
 **Data Structures:**
 - Hash of patients keyed by patient name
 
-#### 4. `CLI` Class (`lib/cli.rb`)
+#### 4. `CLI` Handler (`app/handlers/cli.rb`)
 
-Handles command-line interface concerns.
+Handles command-line interface concerns. This is an interface adapter that translates CLI input into service calls.
 
 **Key Design Decisions:**
 - **Input Source Abstraction**: Determines input source (file vs stdin) and passes an IO-like object to the processor. This keeps the processor agnostic of input source.
-- **Error Handling**: Provides user-friendly error messages for file not found scenarios.
+- **Error Handling**: Provides user-friendly error messages for file not found scenarios using `warn` for better Ruby conventions.
 - **Separation of Concerns**: CLI only handles I/O concerns, delegating all business logic to the processor.
 
 ### Design Tradeoffs
@@ -152,12 +161,18 @@ The test suite is organized to mirror the code structure and includes comprehens
    - Benchmarks event processing and report generation
    - Currently achieving ~200,000+ events per second
 
-5. **Test Coverage**: The tests cover:
+5. **Model Validations**: Comprehensive validation tests ensure:
+   - Patient and Prescription models enforce data integrity
+   - Relationships are properly maintained
+   - Invalid data is rejected with clear error messages
+
+6. **Test Coverage**: The tests cover:
    - All event types and their interactions
    - Income calculation correctness
    - Edge cases (invalid events, missing prescriptions, etc.)
    - Output formatting
    - Performance characteristics
+   - Model relationships and validations
 
 ### Code Organization
 
@@ -214,6 +229,21 @@ This structure makes it easy to add new interfaces (web API, message queue consu
 
 6. **Patients Without Created Prescriptions**: Assumed that patients who only have events for prescriptions that were never created should not appear in the output.
 
+### Model Relationships and Validations
+
+**Relationships:**
+- **Patient has_many Prescriptions**: A patient can have zero or many prescriptions. Prescriptions are managed through the `prescriptions` collection.
+- **Prescription belongs_to Patient**: Each prescription must belong to exactly one patient. The prescription maintains a reference to its patient object.
+
+**Validations:**
+- **Patient**: Name must be present and not empty. Raises `ArgumentError` if validation fails.
+- **Prescription**: 
+  - Patient must be present and an instance of Patient
+  - Drug name must be present and not empty
+  - When adding a prescription to a patient, validates that the prescription's patient matches
+
+These validations ensure data integrity and prevent invalid states from being created.
+
 ### Notable Implementation Details
 
 1. **Return Logic**: Returns can only occur if there are more fills than returns. This prevents invalid states.
@@ -223,6 +253,8 @@ This structure makes it easy to add new interfaces (web API, message queue consu
 3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions.
 
 4. **Sorting**: Patients are sorted alphabetically by name for consistent output ordering.
+
+5. **Relationship Integrity**: Prescriptions maintain a bidirectional relationship with patients, ensuring data consistency throughout the system.
 
 ## Example
 
@@ -270,7 +302,7 @@ If this were to be extended, potential improvements could include:
      - More accurate financial reporting per drug type
      - Ability to model complex pricing scenarios (insurance tiers, discounts, etc.)
 5. **Performance**: Performance tests show the system can handle 200,000+ events per second. For very large files (millions of events), consider streaming processing
-6. **Validation**: More robust input validation and error handling
+6. **Enhanced Validation**: Additional validation rules and custom validators for complex business rules
 7. **Output Formats**: Support for JSON, CSV, or other output formats
 8. **Event Persistence & Change Tracking**: Add event history and audit capabilities:
    - **Event Storage**: Persist all prescription events to a database (e.g., PostgreSQL, DynamoDB) for historical tracking

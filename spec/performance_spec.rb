@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-require "benchmark"
+require 'spec_helper'
+require 'benchmark'
 
-RSpec.describe "Performance and Load Testing" do
-  describe "processing 1000 events" do
-    it "processes events and generates report within reasonable time" do
+RSpec.describe 'Performance and Load Testing' do
+  describe 'processing 1000 events' do
+    it 'processes events and generates report within reasonable time' do
       processor = PrescriptionEventProcessor.new
       events = []
 
@@ -15,17 +15,17 @@ RSpec.describe "Performance and Load Testing" do
         1000.times do
           patient = build(:patient)
           drug = Faker::Alphanumeric.alphanumeric(number: 1, min_alpha: 1).upcase
-          
+
           # Create a realistic event sequence
           event_type = case rand(100)
-                      when 0..30
-                        "created"
-                      when 31..85
-                        "filled"
-                      else
-                        "returned"
-                      end
-          
+                       when 0..30
+                         'created'
+                       when 31..85
+                         'filled'
+                       else
+                         'returned'
+                       end
+
           events << "#{patient.name} #{drug} #{event_type}"
         end
       end
@@ -60,7 +60,7 @@ RSpec.describe "Performance and Load Testing" do
       expect(total_time).to be < 2.0 # Total should be under 2 seconds
     end
 
-    it "handles realistic prescription lifecycle patterns" do
+    it 'handles realistic prescription lifecycle patterns' do
       processor = PrescriptionEventProcessor.new
       events = []
 
@@ -69,26 +69,26 @@ RSpec.describe "Performance and Load Testing" do
         # Create 200 patients with realistic prescription patterns
         200.times do
           patient = build(:patient)
-          
+
           # Each patient gets 1-5 prescriptions
           prescription_count = rand(1..5)
           prescription_count.times do
             drug = Faker::Alphanumeric.alphanumeric(number: 1, min_alpha: 1).upcase
-            
+
             # Realistic pattern: created -> filled (multiple) -> sometimes returned
             events << "#{patient.name} #{drug} created"
-            
+
             fill_count = rand(1..4)
             fill_count.times do
               events << "#{patient.name} #{drug} filled"
             end
-            
+
             # 30% chance of returns
-            if rand < 0.3
-              return_count = rand(1..[fill_count, 2].min)
-              return_count.times do
-                events << "#{patient.name} #{drug} returned"
-              end
+            next unless rand < 0.3
+
+            return_count = rand(1..[fill_count, 2].min)
+            return_count.times do
+              events << "#{patient.name} #{drug} returned"
             end
           end
         end
@@ -118,10 +118,9 @@ RSpec.describe "Performance and Load Testing" do
       report = processor.generate_report
       expect(report).not_to be_empty
       expect(report.length).to be <= 200 # Should have at most 200 patients
-      
+
       # Performance check
       expect(processing_time).to be < 2.0
     end
   end
 end
-

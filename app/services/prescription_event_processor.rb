@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "../models/patient"
-require_relative "../models/prescription"
+require_relative '../models/patient'
+require_relative '../models/prescription'
 
 # Processes prescription events and generates reports
 class PrescriptionEventProcessor
@@ -14,11 +14,11 @@ class PrescriptionEventProcessor
     prescription = patient.get_or_create_prescription(drug_name)
 
     case event_name
-    when "created"
+    when 'created'
       prescription.mark_created
-    when "filled"
+    when 'filled'
       prescription.fill
-    when "returned"
+    when 'returned'
       prescription.return_fill
     else
       # Unknown event type - ignore
@@ -39,9 +39,9 @@ class PrescriptionEventProcessor
 
   def generate_report
     @patients.values
-              .select(&:has_created_prescriptions?)
-              .sort_by(&:name)
-              .map { |patient| format_report_line(patient) }
+             .select(&:has_created_prescriptions?)
+             .sort_by(&:name)
+             .map { |patient| format_report_line(patient) }
   end
 
   private
@@ -57,4 +57,3 @@ class PrescriptionEventProcessor
     "#{patient.name}: #{fills} fills #{income_str} income"
   end
 end
-

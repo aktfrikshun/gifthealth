@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require_relative "../app/models/prescription"
-require_relative "../app/models/patient"
-require_relative "../app/services/prescription_event_processor"
-require_relative "../app/handlers/cli"
-require "factory_bot"
-require "faker"
+require_relative '../app/models/prescription'
+require_relative '../app/models/patient'
+require_relative '../app/services/prescription_event_processor'
+require_relative '../app/handlers/cli'
+require 'factory_bot'
+require 'faker'
 
 # Load factories
-Dir[File.join(__dir__, "factories", "**", "*.rb")].sort.each { |f| require f }
+Dir[File.join(__dir__, 'factories', '**', '*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
@@ -22,16 +22,13 @@ RSpec.configure do |config|
 
   config.shared_context_metadata_behavior = :apply_to_host_groups
   config.filter_run_when_matching :focus
-  config.example_status_persistence_file_path = "spec/examples.txt"
+  config.example_status_persistence_file_path = 'spec/examples.txt'
   config.disable_monkey_patching!
   config.warnings = true
 
-  if config.files_to_run.one?
-    config.default_formatter = "doc"
-  end
+  config.default_formatter = 'doc' if config.files_to_run.one?
 
   config.profile_examples = 10
   config.order = :random
   Kernel.srand config.seed
 end
-

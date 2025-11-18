@@ -8,16 +8,12 @@ FactoryBot.define do
     initialize_with { new(patient: patient, drug_name: drug_name) }
 
     trait :created do
-      after(:build) do |prescription|
-        prescription.mark_created
-      end
+      after(:build, &:mark_created)
     end
 
     trait :filled do
       created
-      after(:build) do |prescription|
-        prescription.fill
-      end
+      after(:build, &:fill)
     end
 
     trait :with_fills do
@@ -43,4 +39,3 @@ FactoryBot.define do
     end
   end
 end
-
