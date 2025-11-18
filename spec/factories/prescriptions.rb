@@ -2,10 +2,10 @@
 
 FactoryBot.define do
   factory :prescription, class: Prescription do
-    patient_name { Faker::Name.first_name }
+    association :patient, factory: :patient
     drug_name { Faker::Alphanumeric.alphanumeric(number: 1, min_alpha: 1).upcase }
 
-    initialize_with { new(patient_name: patient_name, drug_name: drug_name) }
+    initialize_with { new(patient: patient, drug_name: drug_name) }
 
     trait :created do
       after(:build) do |prescription|

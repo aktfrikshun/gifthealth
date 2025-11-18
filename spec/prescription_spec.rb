@@ -3,8 +3,8 @@
 require "spec_helper"
 
 RSpec.describe Prescription do
-  # Using factory for consistency, but keeping explicit values for clarity in these tests
-  let(:prescription) { Prescription.new(patient_name: "John", drug_name: "A") }
+  let(:patient) { Patient.new("John") }
+  let(:prescription) { Prescription.new(patient: patient, drug_name: "A") }
 
   describe "#created?" do
     it "returns false initially" do
@@ -96,6 +96,39 @@ RSpec.describe Prescription do
       # 2 fills, 2 returns: net_fills = 0, return_count = 2
       # income = net_fills * 5 - return_count * 1 = 0 * 5 - 2 * 1 = -2
       expect(prescription.income).to eq(-2)
+    end
+  end
+
+  describe "validations" do
+    it "raises error when patient is nil" do
+      expect { Prescription.new(patient: nil, drug_name: "A") }.to raise_error(ArgumentError, "patient cannot be nil")
+    end
+
+    it "raises error when patient is not a Patient instance" do
+      expect { Prescription.new(patient: "not a patient", drug_name: "A") }.to raise_error(ArgumentError, "patient must be an instance of Patient")
+    end
+
+    it "raises error when drug_name is nil" do
+      expect { Prescription.new(patient: patient, drug_name: nil) }.to raise_error(ArgumentError, "drug_name cannot be nil")
+    end
+
+    it "raises error when drug_name is empty" do
+      expect { Prescription.new(patient: patient, drug_name: "") }.to raise_error(ArgumentError, "drug_name cannot be empty")
+    end
+
+    it "raises error when drug_name is only whitespace" do
+      expect { Prescription.new(patient: patient, drug_name: "   ") }.to raise_error(ArgumentError, "drug_name cannot be empty")
+    end
+  end
+
+  describe "relationships" do
+    it "belongs to a patient" do
+      expect(prescription.patient).to eq(patient)
+      expect(prescription.patient.name).to eq("John")
+    end
+
+    it "returns patient_name from patient" do
+      expect(prescription.patient_name).to eq("John")
     end
   end
 end

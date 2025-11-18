@@ -59,7 +59,7 @@ RSpec.describe "Patient Factory" do
             break name unless used_drug_names.include?(name)
           end
           used_drug_names.add(drug_name)
-          prescription = build(:prescription, :with_fills, patient_name: patient.name, drug_name: drug_name, fill_count: fill_count)
+          prescription = build(:prescription, :with_fills, patient: patient, drug_name: drug_name, fill_count: fill_count)
           patient.instance_variable_get(:@prescriptions)[drug_name] = prescription
         end
 
@@ -75,15 +75,15 @@ RSpec.describe "Patient Factory" do
       patient = build(:patient)
       
       # Manually add prescriptions with different states
-      prescription1 = build(:prescription, :created, patient_name: patient.name, drug_name: "A")
+      prescription1 = build(:prescription, :created, patient: patient, drug_name: "A")
       prescription1.fill
       prescription1.fill
       
-      prescription2 = build(:prescription, :created, patient_name: patient.name, drug_name: "B")
+      prescription2 = build(:prescription, :created, patient: patient, drug_name: "B")
       prescription2.fill
       prescription2.return_fill
       
-      prescription3 = build(:prescription, :created, patient_name: patient.name, drug_name: "C")
+      prescription3 = build(:prescription, :created, patient: patient, drug_name: "C")
       
       patient.instance_variable_get(:@prescriptions)["A"] = prescription1
       patient.instance_variable_get(:@prescriptions)["B"] = prescription2

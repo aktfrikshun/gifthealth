@@ -23,7 +23,7 @@ FactoryBot.define do
             break name unless used_drug_names.include?(name)
           end
           used_drug_names.add(drug_name)
-          prescription = build(:prescription, *evaluator.prescription_traits, patient_name: patient.name, drug_name: drug_name)
+          prescription = build(:prescription, *evaluator.prescription_traits, patient: patient, drug_name: drug_name)
           patient.instance_variable_get(:@prescriptions)[drug_name] = prescription
         end
       end
@@ -44,7 +44,7 @@ FactoryBot.define do
             break name unless used_drug_names.include?(name)
           end
           used_drug_names.add(drug_name)
-          prescription = build(:prescription, :with_fills, patient_name: patient.name, drug_name: drug_name, fill_count: evaluator.fill_count)
+          prescription = build(:prescription, :with_fills, patient: patient, drug_name: drug_name, fill_count: evaluator.fill_count)
           patient.instance_variable_get(:@prescriptions)[drug_name] = prescription
         end
       end
