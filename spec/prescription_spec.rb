@@ -18,14 +18,14 @@ RSpec.describe Prescription do
   end
 
   describe '#fill' do
-    it 'returns false if prescription is not created' do
-      expect(prescription.fill).to be false
+    it 'returns nil if prescription is not created' do
+      expect(prescription.fill).to be_nil
       expect(prescription.net_fills).to eq(0)
     end
 
     it 'increments fill count after creation' do
       prescription.mark_created
-      expect(prescription.fill).to be true
+      expect(prescription.fill).to eq(prescription)
       expect(prescription.net_fills).to eq(1)
     end
 
@@ -38,20 +38,20 @@ RSpec.describe Prescription do
   end
 
   describe '#return_fill' do
-    it 'returns false if prescription is not created' do
-      expect(prescription.return_fill).to be false
+    it 'returns nil if prescription is not created' do
+      expect(prescription.return_fill).to be_nil
     end
 
-    it 'returns false if there are no fills to return' do
+    it 'returns nil if there are no fills to return' do
       prescription.mark_created
-      expect(prescription.return_fill).to be false
+      expect(prescription.return_fill).to be_nil
     end
 
     it 'decrements net fills when returning' do
       prescription.mark_created
       prescription.fill
       prescription.fill
-      expect(prescription.return_fill).to be true
+      expect(prescription.return_fill).to eq(prescription)
       expect(prescription.net_fills).to eq(1)
     end
 
@@ -59,7 +59,7 @@ RSpec.describe Prescription do
       prescription.mark_created
       prescription.fill
       prescription.return_fill
-      expect(prescription.return_fill).to be false
+      expect(prescription.return_fill).to be_nil
       expect(prescription.net_fills).to eq(0)
     end
   end

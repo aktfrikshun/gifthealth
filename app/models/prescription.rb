@@ -29,18 +29,18 @@ class Prescription
   end
 
   def fill
-    return false unless @created
+    return nil unless @created
 
     @fill_count += 1
-    true
+    self
   end
 
   def return_fill
-    return false unless @created
-    return false if @fill_count <= @return_count
+    return nil unless @created
+    return nil if @fill_count <= @return_count
 
     @return_count += 1
-    true
+    self
   end
 
   def net_fills

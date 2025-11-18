@@ -23,10 +23,6 @@ Layout/LineLength:
 Naming/PredicatePrefix:
   Enabled: false
 
-Naming/PredicateMethod:
-  Exclude:
-    - 'app/models/prescription.rb'
-
 Style/EmptyElse:
   Enabled: false
 
