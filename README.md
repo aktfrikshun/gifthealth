@@ -250,6 +250,12 @@ If this were to be extended, potential improvements could include:
 6. **Output Formats**: Support for JSON, CSV, or other output formats
 7. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
    - **Web Interface**: RESTful API and web UI for receiving input via file uploads or direct API calls
+   - **Event Ingestion**: Use AWS SQS (Simple Queue Service) for asynchronous event ingestion, enabling:
+     - Decoupled architecture with producers and consumers
+     - Reliable message delivery with retry mechanisms
+     - Ability to handle high-volume event streams
+     - Dead-letter queues for failed event processing
+     - Batch processing for improved efficiency
    - **Stateless Architecture**: Each request processes independently, making it horizontally scalable
    - **Cloud Deployment**: Deploy on AWS Fargate for serverless container execution with automatic scaling
    - **CI/CD Pipeline**: Implement cloud-based CI/CD (e.g., GitHub Actions, GitLab CI, or AWS CodePipeline) for automated testing, building, and deployment
@@ -258,5 +264,5 @@ If this were to be extended, potential improvements could include:
      - Automatic scaling based on demand
      - Pay-per-use cost model
      - High availability and fault tolerance
-     - Easy integration with other cloud services (S3 for file storage, CloudWatch for monitoring, etc.)
+     - Easy integration with other cloud services (S3 for file storage, CloudWatch for monitoring, SQS for event queuing, etc.)
 
