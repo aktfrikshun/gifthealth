@@ -3,7 +3,11 @@
 require "spec_helper"
 
 RSpec.describe Prescription do
+  # Using factory for consistency, but keeping explicit values for clarity in these tests
   let(:prescription) { Prescription.new(patient_name: "John", drug_name: "A") }
+  
+  # Example of using factory with random data for property-based testing
+  let(:random_prescription) { build(:prescription) }
 
   describe "#created?" do
     it "returns false initially" do

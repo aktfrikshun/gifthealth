@@ -4,8 +4,14 @@ require_relative "../lib/prescription"
 require_relative "../lib/patient"
 require_relative "../lib/prescription_event_processor"
 require_relative "../lib/cli"
+require "factory_bot"
+require "faker"
+
+# Load factories
+Dir[File.join(__dir__, "factories", "**", "*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
