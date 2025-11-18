@@ -231,13 +231,13 @@ This structure makes it easy to add new interfaces (web API, message queue consu
 
 2. **Event Ordering**: Assumed events are processed in the order they appear in the input file.
 
-3. **Patient/Drug Uniqueness**: Assumed that patient names and drug names don't contain spaces (as stated in requirements).
+3. **Patient/Drug Names**: Assumed that patient names and drug names don't contain spaces (as stated in requirements).
 
 4. **Output Format**: Assumed the output format should match the example exactly, including the colon after patient name and the specific wording ("fills", "income").
 
 5. **Income Calculation**: Interpreted "returns cancel out a prior filled event" to mean returns cancel both the fill count and the income from that fill, plus incur a $1 penalty.
 
-6. **Patients Without Created Prescriptions**: Assumed that patients who only have events for prescriptions that were never created should not appear in the output.
+6. **Patients Without Created Prescriptions**: Assumed that patients who only have events for prescriptions that were never created should not appear in the output.  **Verify with product owner
 
 ### Model Relationships and Validations
 
@@ -260,7 +260,7 @@ These validations ensure data integrity and prevent invalid states from being cr
 
 2. **Fill Logic**: Fills can only occur after a prescription is created. Fills before creation are silently ignored. **Question for product owner: Should these be silently ignored, or should we abort or log warning?
 
-3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions. **Question for product owner: Should we report on patients with events that for missing prescriptions?
+3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions. **Question for product owner: Should we report on patients with events for missing prescriptions?
 
 4. **Sorting**: Patients are sorted alphabetically by name for consistent output ordering.
 
@@ -292,7 +292,7 @@ Mark: 2 fills $9 income
 Nick: 0 fills $0 income
 ```
 
-## Future Enhancements (If Needed)
+## Future Enhancements to Consider
 
 If this were to be extended, potential improvements could include:
 
@@ -340,7 +340,7 @@ If this were to be extended, potential improvements could include:
      - Dead-letter queues for failed event processing
      - Batch processing for improved efficiency
    - **Stateless Architecture**: Each request processes independently, making it horizontally scalable
-   - **Cloud Deployment**: Deploy on a IaaS service such as AWS Fargate for serverless container execution with automatic scaling
+   - **Cloud Deployment**: Deploy on a IaaS platform such as AWS Fargate for serverless container execution with automatic scaling
    - **CI/CD Pipeline**: Implement cloud-based CI/CD (e.g., GitHub Actions, GitLab CI, or AWS CodePipeline) for automated testing, building, and deployment
    - **Benefits**: 
      - No server management overhead
