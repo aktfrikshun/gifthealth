@@ -4,9 +4,8 @@ A Ruby command-line application that processes prescription events and generates
 
 ## Requirements
 
-- Ruby >= 3.4.0 (tested with Ruby 3.4.1 via rbenv)
+- Ruby >= 3.4.0
 - Bundler (for dependency management)
-- rbenv (recommended for Ruby version management)
 
 ## Installation
 
@@ -251,9 +250,9 @@ These validations ensure data integrity and prevent invalid states from being cr
 
 1. **Return Logic**: Returns can only occur if there are more fills than returns. This prevents invalid states.
 
-2. **Fill Logic**: Fills can only occur after a prescription is created. Fills before creation are silently ignored.
+2. **Fill Logic**: Fills can only occur after a prescription is created. Fills before creation are silently ignored. **Question for product owner: Should these be silently ignored, or should we abort or log warning?
 
-3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions.
+3. **Report Filtering**: Only patients with at least one created prescription appear in the report, even if they have other events for non-created prescriptions. **Question for product owner: Should we report on patients with events that for missing prescriptions?
 
 4. **Sorting**: Patients are sorted alphabetically by name for consistent output ordering.
 
@@ -326,14 +325,14 @@ If this were to be extended, potential improvements could include:
      - Historical analysis and reporting capabilities
 9. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
    - **Web Interface**: RESTful API and web UI for receiving input via file uploads or direct API calls
-   - **Event Ingestion**: Use AWS SQS (Simple Queue Service) for asynchronous event ingestion, enabling:
+   - **Event Ingestion**: Use asynchronous event ingestion such as AWS SQS (Simple Queue Service), enabling:
      - Decoupled architecture with producers and consumers
      - Reliable message delivery with retry mechanisms
      - Ability to handle high-volume event streams
      - Dead-letter queues for failed event processing
      - Batch processing for improved efficiency
    - **Stateless Architecture**: Each request processes independently, making it horizontally scalable
-   - **Cloud Deployment**: Deploy on AWS Fargate for serverless container execution with automatic scaling
+   - **Cloud Deployment**: Deploy on a IaaS service such as AWS Fargate for serverless container execution with automatic scaling
    - **CI/CD Pipeline**: Implement cloud-based CI/CD (e.g., GitHub Actions, GitLab CI, or AWS CodePipeline) for automated testing, building, and deployment
    - **Benefits**: 
      - No server management overhead
