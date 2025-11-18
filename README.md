@@ -2,6 +2,14 @@
 
 A Ruby command-line application that processes prescription events and generates income reports for a pharmacy system.
 
+## Documentation
+
+Additional documentation is available in the [`documents/`](documents/) folder:
+
+- **[Requirements](documents/REQUIREMENTS.md)**: Original project requirements and specifications
+- **[SOLID Principles](documents/SOLID_PRINCIPLES.md)**: Detailed explanation of how SOLID principles are applied in this codebase
+- **[Technology Choices](documents/TECHNOLOGY_CHOICES.md)**: Rationale for selecting Ruby with Bundler (without Rails) and comparisons with other languages
+
 ## Requirements
 
 - Ruby >= 3.4.0
@@ -43,9 +51,9 @@ bundle exec rspec --format documentation
 
 ### Overview
 
-The solution is organized into a clean, object-oriented architecture with clear separation of concerns. The design follows SOLID principles and emphasizes testability and maintainability. See `documents/SOLID_PRINCIPLES.md` for detailed documentation on how SOLID principles are applied in this codebase.
+The solution is organized into a clean, object-oriented architecture with clear separation of concerns. The design follows SOLID principles and emphasizes testability and maintainability. See [SOLID Principles](documents/SOLID_PRINCIPLES.md) for detailed documentation on how SOLID principles are applied in this codebase.
 
-For information on technology choices and why Ruby with Bundler was selected (without Rails), see `documents/TECHNOLOGY_CHOICES.md`.
+For information on technology choices and why Ruby with Bundler was selected (without Rails), see [Technology Choices](documents/TECHNOLOGY_CHOICES.md).
 
 ### Core Components
 
