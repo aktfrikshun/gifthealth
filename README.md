@@ -245,7 +245,19 @@ If this were to be extended, potential improvements could include:
 1. **Error Reporting**: More detailed error messages for invalid events
 2. **Logging**: Add logging for debugging and audit trails
 3. **Configuration**: Make income amounts ($5 per fill, $1 per return) configurable
-4. **Performance**: Performance tests show the system can handle 200,000+ events per second. For very large files (millions of events), consider streaming processing
+4. **Drug-Based Pricing**: Allow for the creation of Drug entities with associated name and pricing:
+   - **Drug Model**: Create a Drug entity with:
+     - Drug name/identifier
+     - Fill price (revenue per fill)
+     - Return cost (cost per return)
+   - **Prescription Updates**: A prescription would reference both a Patient and a Drug
+   - **Dynamic Income Calculation**: Prescription income would be derived from the Drug-specific `fill_price` and `return_cost` rather than hardcoded values
+   - **Benefits**:
+     - Support for different pricing tiers (generic vs. brand name drugs)
+     - Flexible pricing model that can change over time
+     - More accurate financial reporting per drug type
+     - Ability to model complex pricing scenarios (insurance tiers, discounts, etc.)
+5. **Performance**: Performance tests show the system can handle 200,000+ events per second. For very large files (millions of events), consider streaming processing
 5. **Validation**: More robust input validation and error handling
 6. **Output Formats**: Support for JSON, CSV, or other output formats
 7. **Event Persistence & Change Tracking**: Add event history and audit capabilities:
