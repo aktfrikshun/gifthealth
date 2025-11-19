@@ -100,7 +100,7 @@ Orchestrates the event processing and report generation. Contains the core busin
 - **Patient Storage**: Uses a hash keyed by patient name for O(1) patient lookup.
 - **Report Generation**: Filters out patients with no created prescriptions before generating the report, ensuring only relevant patients appear in the output.
 - **Sorting**: Sorts patients by fill count (descending), then by income (ascending) to match the expected output format from requirements.
-  - **Note**: The sorting order was determined by analyzing the expected output in REQUIREMENTS.md. The pattern prioritizes patients with more fills, then groups by income within the same fill count.
+  - **Note**: The sorting order was determined by analyzing the expected output in REQUIREMENTS.md. The pattern prioritizes patients with more fills, then groups by income within the same fill count. **Need to verify with product owner
 
 **Data Structures:**
 - Hash of patients keyed by patient name
