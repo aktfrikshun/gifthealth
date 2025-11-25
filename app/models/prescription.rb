@@ -51,7 +51,6 @@ class Prescription
     # Each fill gives $5, but returns cancel the income from the fill AND cost $1
     # So: (net_fills * 5) - (return_count * 1)
     # This means: (fill_count - return_count) * 5 - return_count * 1
-    # Which simplifies to: fill_count * 5 - return_count * 6
     (net_fills * 5) - (@return_count * 1)
   end
 
