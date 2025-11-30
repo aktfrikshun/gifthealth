@@ -6,6 +6,7 @@
 /pkg/
 /spec/reports/
 /tmp/
+/log/
 *.gem
 *.rbc
 .bundle
@@ -23,4 +24,5 @@ spec/reports
 test/tmp
 test/version_tmp
 tmp
+log/*.log
 
