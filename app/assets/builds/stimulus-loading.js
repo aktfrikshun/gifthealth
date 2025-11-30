@@ -1,10 +1,8 @@
-// Load all the controllers within this directory and all subdirectories. 
-// Controller files must be named *_controller.js.
+// Load and register all Stimulus controllers
 
 import { application } from "controllers/application"
 
-// Configure Stimulus development experience
-application.debug = false
-window.Stimulus   = application
+// Manually import and register controllers
+import DrugAutocompleteController from "controllers/drug_autocomplete_controller"
 
-export { application }
+application.register("drug-autocomplete", DrugAutocompleteController)
