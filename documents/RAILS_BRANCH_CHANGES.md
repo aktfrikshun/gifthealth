@@ -725,6 +725,78 @@ The project includes three automated workflows for continuous integration, secur
 ![CodeQL](https://github.com/aktfrikshun/gifthealth/actions/workflows/codeql.yml/badge.svg)
 ```
 
+#### 4. HIPAA Compliance Workflow (`.github/workflows/hipaa-compliance.yml`)
+
+**Triggers:**
+- Push to `main` or `rails` branches
+- Pull requests targeting `main` or `rails` branches
+- Daily schedule: 3:00 AM UTC
+
+**Jobs:**
+
+**PHI Detection:**
+- **detect-secrets**: Scans codebase for hardcoded credentials and sensitive data
+- **Nightfall AI**: ML-based PHI detection (optional, requires API key)
+  - Detects 100+ types of sensitive information
+  - SSN, medical record numbers, credit cards, etc.
+- **Custom Pattern Matching**: Regex-based detection for:
+  - Social Security Numbers: `\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b`
+  - Medical Record Numbers: `\bMRN[:\s]*[0-9]{6,}\b`
+  - Credit Card Numbers: Standard patterns
+  - Real email addresses in test data
+
+**Security Controls:**
+- SSL/TLS enforcement verification
+- Encryption configuration checks (at-rest and in-transit)
+- Session security validation (secure cookies, timeout)
+- Database security audit (connection encryption, .gitignore)
+- Audit logging implementation check
+
+**Access Control:**
+- Authentication framework detection (Devise, Authlogic, Sorcery)
+- Authorization implementation check (Pundit, CanCanCan)
+- API endpoint authentication verification
+- **Current Status**: ❌ API has no authentication (fails check)
+
+**Data Retention:**
+- Policy documentation verification
+- Automated cleanup task detection
+- Retention schedule validation
+
+**Dependency Vulnerabilities (HIPAA Focus):**
+- bundler-audit with CVE database updates
+- OWASP Dependency Check
+- HTML vulnerability reports uploaded as artifacts
+
+**Compliance Reporting:**
+- Aggregates results from all jobs
+- Generates HIPAA compliance summary report
+- Includes compliance checklist
+- Uploaded as GitHub Actions artifact
+
+**Enable Nightfall AI (Optional):**
+```bash
+# 1. Sign up at https://nightfall.ai
+# 2. Get API key
+# 3. Add to GitHub repository secrets:
+#    Settings > Secrets > Actions > New repository secret
+#    Name: NIGHTFALL_API_KEY
+#    Value: your-api-key
+```
+
+**Status Badge:**
+```markdown
+![HIPAA Compliance](https://github.com/aktfrikshun/gifthealth/actions/workflows/hipaa-compliance.yml/badge.svg)
+```
+
+**Important Notes:**
+- ⚠️ Application is **NOT currently HIPAA compliant**
+- See `HIPAA_COMPLIANCE.md` for full requirements
+- API endpoints currently have no authentication
+- No encryption at rest implemented
+- No audit logging configured
+- For development/testing only - not production ready
+
 ### Branch Strategy
 
 **Main Branch:**
@@ -804,6 +876,9 @@ Metrics/BlockLength:
 - **Mondays 8 AM UTC**: Full security audit (bundler-audit + Brakeman)
 - **Wednesdays 2 AM UTC**: CodeQL analysis
 
+**Daily Scans:**
+- **Daily 3 AM UTC**: HIPAA compliance checks (PHI detection, security controls)
+
 **On-Demand:**
 - Every push to main/rails branches
 - Every pull request
@@ -812,6 +887,7 @@ Metrics/BlockLength:
 - GitHub Actions UI
 - Email alerts (configurable)
 - Security tab updates
+- Compliance reports (downloadable artifacts)
 
 ### Pull Request Checklist
 
@@ -819,7 +895,9 @@ Before merging:
 - [ ] All CI tests pass
 - [ ] RuboCop clean (0 offenses)
 - [ ] No security vulnerabilities
+- [ ] No PHI detected in code
 - [ ] CodeQL analysis complete
+- [ ] HIPAA compliance checks pass (or documented exceptions)
 - [ ] Code reviewed by team member
 - [ ] Documentation updated
 - [ ] CHANGELOG updated (if applicable)
@@ -834,6 +912,10 @@ bundle exec rubocop -a         # Auto-fix violations
 bundle audit                   # Check for vulnerabilities
 brakeman                       # Security scan
 
+# Optional: Check for PHI patterns
+grep -r -E '\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b' app/ spec/  # SSN check
+grep -r -E '\bMRN[:\s]*[0-9]{6,}\b' app/ spec/         # MRN check
+
 # Commit if all pass
 git add .
 git commit -m "Descriptive message"
@@ -841,6 +923,47 @@ git push origin feature-branch
 
 # CI will run automatically
 ```
+
+### Third-Party Security Tools
+
+**Integrated in CI/CD:**
+
+1. **Nightfall AI** (Optional)
+   - ML-based PHI/PII detection
+   - Free tier: 1,000 API calls/month
+   - Setup: Add `NIGHTFALL_API_KEY` to GitHub secrets
+   - [Sign up](https://nightfall.ai)
+
+2. **detect-secrets** (Included)
+   - Open source secrets detection
+   - Prevents credential leaks
+   - Creates baseline for tracking changes
+   - No setup required
+
+3. **OWASP Dependency-Check** (Included)
+   - CVE vulnerability scanning
+   - Generates detailed HTML reports
+   - Available as workflow artifacts
+   - No setup required
+
+4. **Brakeman** (Included)
+   - Rails security scanner
+   - Detects common vulnerabilities
+   - SQL injection, XSS, etc.
+   - No setup required
+
+5. **CodeQL** (Included)
+   - GitHub's semantic code analysis
+   - Security and quality queries
+   - Supports Ruby and JavaScript
+   - No setup required
+
+**Alternative Tools (Not Integrated):**
+
+- **GitGuardian**: Secrets detection, free for public repos
+- **TruffleHog**: Git history secret scanning
+- **Snyk**: Dependency vulnerability scanning
+- **Vanta/Drata**: Compliance automation platforms
 
 ### Monitoring CI/CD
 
@@ -892,6 +1015,57 @@ https://github.com/aktfrikshun/gifthealth/actions
    - Slack integration for build status
    - Email alerts for security findings
    - Discord webhooks
+
+7. **HIPAA Compliance Automation**
+   - Automated BAA tracking
+   - Compliance report generation
+   - Vendor security assessment tracking
+   - Training completion tracking
+
+8. **Advanced PHI Detection**
+   - Custom ML models for healthcare data
+   - Integration with healthcare-specific scanners
+   - Database content scanning (not just code)
+
+### Compliance Documentation
+
+**Created Files:**
+- `HIPAA_COMPLIANCE.md`: Comprehensive HIPAA compliance guide
+  - Current compliance status
+  - Critical requirements
+  - Implementation roadmap
+  - Recommended gems and tools
+  - Production deployment checklist
+  - Cost estimates
+
+**Key Resources:**
+- [HIPAA Compliance Guide](../HIPAA_COMPLIANCE.md)
+- [API Documentation](API_DOCUMENTATION.md)
+- [SOLID Principles](SOLID_PRINCIPLES.md)
+- [Technology Choices](TECHNOLOGY_CHOICES.md)
+- [Requirements](REQUIREMENTS.md)
+
+### Security Best Practices
+
+**Implemented:**
+- ✅ Automated security scanning on every commit
+- ✅ Weekly scheduled security audits
+- ✅ Daily HIPAA compliance checks
+- ✅ PHI pattern detection
+- ✅ Dependency vulnerability scanning
+- ✅ Code quality enforcement
+- ✅ RuboCop style checking
+
+**Not Yet Implemented (Required for Production):**
+- ❌ User authentication (see HIPAA_COMPLIANCE.md)
+- ❌ API authentication
+- ❌ Encryption at rest
+- ❌ Audit logging
+- ❌ Session management
+- ❌ Rate limiting
+- ❌ Role-based access control
+
+**See HIPAA_COMPLIANCE.md for complete implementation guide**
 
 ---
 
