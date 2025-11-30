@@ -102,4 +102,3 @@ class PrescriptionEventProcessor
     "#{patient.name}: #{fills} fills #{income_str} income"
   end
 end
-

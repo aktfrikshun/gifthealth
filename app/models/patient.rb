@@ -4,15 +4,15 @@
 # Has many Prescriptions (has_many :prescriptions)
 class Patient < ApplicationRecord
   has_many :prescriptions, dependent: :destroy
-  
+
   validates :name, presence: true, uniqueness: true
-  
+
   # Gets an existing prescription or creates a new one for the given drug
   #
   # This method implements a lazy initialization pattern for prescriptions. If a
   # prescription for the given drug already exists, it returns that prescription.
   # Otherwise, it creates a new Prescription instance associated with this patient
-  # and stores it in the database. This ensures that each patient has at most one 
+  # and stores it in the database. This ensures that each patient has at most one
   # prescription per drug name, which is the correct business model.
   #
   # @param drug_name [String] The name of the drug to get or create a prescription for
@@ -65,4 +65,3 @@ class Patient < ApplicationRecord
     prescriptions.count
   end
 end
-

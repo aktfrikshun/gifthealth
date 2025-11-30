@@ -94,7 +94,7 @@ RSpec.describe PrescriptionEventProcessor do
       # Should be sorted: fills desc, then income asc
       expect(report[0]).to include('Alice') # 2 fills (highest)
       expect(report[1]).to include('Bob')   # 1 fill
-      expect(report[2]).to include('David')  # 0 fills, -$1 (lower income)
+      expect(report[2]).to include('David') # 0 fills, -$1 (lower income)
       expect(report[3]).to include('Charlie') # 0 fills, $0 (higher income)
     end
 

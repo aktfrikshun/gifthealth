@@ -2,11 +2,12 @@
 
 module Api
   module V1
+    # API endpoint for processing prescription events
     class PrescriptionEventsController < ActionController::API
       # POST /api/v1/prescription_events
       def create
         unless params[:patient_name] && params[:drug_name] && params[:event_name]
-          render json: { error: 'Missing required parameters: patient_name, drug_name, event_name' }, 
+          render json: { error: 'Missing required parameters: patient_name, drug_name, event_name' },
                  status: :bad_request
           return
         end
@@ -19,7 +20,7 @@ module Api
             event_name: params[:event_name]
           )
 
-          render json: { 
+          render json: {
             message: 'Event processed successfully',
             patient_name: params[:patient_name],
             drug_name: params[:drug_name],

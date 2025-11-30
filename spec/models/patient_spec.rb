@@ -98,4 +98,3 @@ RSpec.describe Patient do
     end
   end
 end
-

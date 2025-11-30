@@ -143,4 +143,3 @@ RSpec.describe Prescription do
     end
   end
 end
-

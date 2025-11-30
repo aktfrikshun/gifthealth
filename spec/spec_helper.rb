@@ -15,7 +15,7 @@ Dir[File.join(__dir__, 'factories', '**', '*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
-  
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
@@ -53,4 +53,3 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 end
-

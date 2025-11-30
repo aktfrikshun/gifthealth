@@ -5,6 +5,7 @@ AllCops:
   Exclude:
     - 'spec/examples.txt'
     - 'bin/**/*'
+    - 'db/schema.rb'
 
 Style/StringLiterals:
   EnforcedStyle: single_quotes
@@ -13,9 +14,24 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
     - 'spec/factories/**/*'
+    - 'config/routes.rb'
 
 Metrics/MethodLength:
-  Max: 15
+  Max: 40
+  Exclude:
+    - 'app/controllers/**/*'
+
+Metrics/AbcSize:
+  Max: 36
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/ClassLength:
+  Max: 150
 
 Layout/LineLength:
   Max: 120

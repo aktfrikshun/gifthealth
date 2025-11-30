@@ -9,7 +9,7 @@ Rails.application.configure do
   config.public_file_server.headers = { 'Cache-Control' => 'public, max-age=3600' }
   config.consider_all_requests_local = true
   config.action_controller.raise_on_missing_callback_actions = true
-  
+
   config.active_record.migration_error = :page_load
   config.active_record.verbose_query_logs = true
 end

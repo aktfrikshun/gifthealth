@@ -4,10 +4,10 @@
 # Belongs to a Patient (belongs_to :patient)
 class Prescription < ApplicationRecord
   belongs_to :patient
-  
+
   validates :drug_name, presence: true
   validates :drug_name, uniqueness: { scope: :patient_id }
-  
+
   # Returns the name of the patient associated with this prescription
   #
   # This method provides a convenient way to access the patient's name without
@@ -88,7 +88,6 @@ class Prescription < ApplicationRecord
     # Each fill gives $5, but returns cancel the income from the fill AND cost $1
     # So: (net_fills * 5) - (return_count * 1)
     # This means: (fill_count - return_count) * 5 - return_count * 1
-    (net_fills * 5) - (return_count * 1)
+    (net_fills * 5) - return_count
   end
 end
-

@@ -2,11 +2,11 @@
 
 Rails.application.routes.draw do
   root 'prescriptions#index'
-  
+
   # Documentation viewer
   get 'documents/:name', to: 'documents#show', as: :document
-  
-  resources :patients, only: [:index, :destroy] do
+
+  resources :patients, only: %i[index destroy] do
     member do
       delete :clear_prescriptions
     end
@@ -14,7 +14,7 @@ Rails.application.routes.draw do
       delete :reset_all
     end
   end
-  
+
   resources :prescriptions do
     collection do
       post :upload
@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       patch :decrement_fill
     end
   end
-  
+
   namespace :api do
     namespace :v1 do
       resources :prescription_events, only: [:create] do
