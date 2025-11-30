@@ -2,7 +2,6 @@
 
 require 'net/http'
 require 'json'
-require 'set'
 
 # Service for validating and searching drug names via RxNorm API
 class RxNormService
@@ -20,22 +19,22 @@ class RxNormService
     return [] unless response
 
     candidates = response.dig('approximateGroup', 'candidate') || []
-    
+
     # Filter candidates that have names and are unique
     seen_names = Set.new
     results = []
-    
+
     candidates.each do |candidate|
       name = candidate['name']
       next if name.blank?
       next if seen_names.include?(name.downcase)
-      
+
       seen_names.add(name.downcase)
       results << { name: name, display: name, rxcui: candidate['rxcui'] }
-      
+
       break if results.size >= limit
     end
-    
+
     results
   rescue StandardError => e
     Rails.logger.error "RxNorm autocomplete error: #{e.message}"
