@@ -13,7 +13,7 @@ module Api
           return
         end
 
-        results = RxNormService.autocomplete(query, limit: 15)
+        results = RxNormService.autocomplete(query, limit: 20)
         render json: results
       end
 

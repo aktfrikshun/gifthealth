@@ -13,22 +13,28 @@ RSpec.describe RxNormService do
     end
 
     it 'returns drug suggestions for valid query' do
-      stub_request(:get, %r{https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json})
+      stub_request(:get, %r{https://rxnav.nlm.nih.gov/REST/approximateTerm.json})
         .to_return(
           status: 200,
-          body: { suggestionGroup: { suggestionList: { suggestion: %w[Aspirin Asparaginase] } } }.to_json,
+          body: {
+            approximateGroup: {
+              candidate: [
+                { rxcui: '1191', name: 'Aspirin', score: '10' },
+                { rxcui: '1192', name: 'Aspirin Low', score: '9' },
+                { rxcui: '1193', score: '8' } # No name - should be filtered out
+              ]
+            }
+          }.to_json,
           headers: { 'Content-Type' => 'application/json' }
         )
 
       results = described_class.autocomplete('aspirin', limit: 5)
 
       expect(results).to be_an(Array)
-      expect(results.size).to be <= 5
-
-      results.each do |drug|
-        expect(drug).to have_key(:name)
-        expect(drug).to have_key(:display)
-      end
+      expect(results.size).to eq(2) # Only 2 with names
+      expect(results.first).to have_key(:name)
+      expect(results.first).to have_key(:display)
+      expect(results.first).to have_key(:rxcui)
     end
 
     it 'handles API errors gracefully' do

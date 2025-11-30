@@ -2,6 +2,7 @@
 
 require 'net/http'
 require 'json'
+require 'set'
 
 # Service for validating and searching drug names via RxNorm API
 class RxNormService
@@ -11,19 +12,31 @@ class RxNormService
   def self.autocomplete(query, limit: 10)
     return [] if query.blank? || query.length < 2
 
-    uri = URI("#{BASE_URI}/spellingsuggestions.json")
-    uri.query = URI.encode_www_form(name: query)
+    # Use approximateTerm for better autocomplete results
+    uri = URI("#{BASE_URI}/approximateTerm.json")
+    uri.query = URI.encode_www_form(term: query, maxEntries: limit * 3)
 
     response = make_request(uri)
     return [] unless response
 
-    suggestions = response.dig('suggestionGroup', 'suggestionList', 'suggestion') || []
-    suggestions.first(limit).map do |suggestion|
-      {
-        name: suggestion,
-        display: suggestion
-      }
+    candidates = response.dig('approximateGroup', 'candidate') || []
+    
+    # Filter candidates that have names and are unique
+    seen_names = Set.new
+    results = []
+    
+    candidates.each do |candidate|
+      name = candidate['name']
+      next if name.blank?
+      next if seen_names.include?(name.downcase)
+      
+      seen_names.add(name.downcase)
+      results << { name: name, display: name, rxcui: candidate['rxcui'] }
+      
+      break if results.size >= limit
     end
+    
+    results
   rescue StandardError => e
     Rails.logger.error "RxNorm autocomplete error: #{e.message}"
     []
