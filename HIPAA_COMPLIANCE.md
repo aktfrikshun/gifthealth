@@ -185,24 +185,57 @@ end
 
 **Implementation Plan:**
 ```bash
-# Automated backup script
-#!/bin/bash
-# backup.sh
+# Automated RDS backup (built-in)
+# Enable in RDS console or via Terraform:
 
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/encrypted/backups"
-DB_NAME="gifthealth_production"
+resource "aws_db_instance" "main" {
+  identifier = "gifthealth-db"
+  
+  # Automated backups
+  backup_retention_period = 35  # 35 days
+  backup_window          = "03:00-04:00"
+  
+  # Encryption at rest (required for HIPAA)
+  storage_encrypted = true
+  kms_key_id       = aws_kms_key.rds.arn
+  
+  # Monitoring
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  
+  # High availability
+  multi_az = true
+}
 
-# Backup database
-pg_dump $DB_NAME | gpg --encrypt --recipient admin@pharmacy.com > \
-  "$BACKUP_DIR/db_backup_$DATE.sql.gpg"
-
-# Upload to S3 with encryption
-aws s3 cp "$BACKUP_DIR/db_backup_$DATE.sql.gpg" \
-  s3://hipaa-compliant-bucket/ --sse AES256
-
-# Retain for 7 years
-# Configure S3 lifecycle policy
+# Long-term backup to S3
+resource "aws_s3_bucket" "backups" {
+  bucket = "gifthealth-hipaa-backups"
+  
+  versioning {
+    enabled = true
+  }
+  
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = aws_kms_key.s3.arn
+      }
+    }
+  }
+  
+  lifecycle_rule {
+    enabled = true
+    
+    transition {
+      days          = 90
+      storage_class = "GLACIER"
+    }
+    
+    expiration {
+      days = 2555  # 7 years
+    }
+  }
+}
 ```
 
 ### 🟡 MEDIUM PRIORITY - Required for Full Compliance
@@ -215,13 +248,29 @@ aws s3 cp "$BACKUP_DIR/db_backup_$DATE.sql.gpg" \
 - Regular vendor security reviews
 
 **Vendors Requiring BAA:**
-- Cloud hosting provider (AWS, Heroku, etc.)
-- Database service (RDS, etc.)
-- Backup storage (S3, etc.)
-- Email service (SendGrid, etc.)
-- Analytics service (if used)
-- Error tracking (Sentry, etc.)
+- Cloud hosting provider (AWS - sign BAA in console)
+- Database service (Amazon RDS - HIPAA-eligible)
+- Backup storage (Amazon S3 - HIPAA-eligible)
+- Log storage (CloudWatch Logs - HIPAA-eligible)
+- Email service (Amazon SES with BAA, or SendGrid)
+- Analytics service (if used - verify HIPAA compliance)
+- Error tracking (Sentry with BAA, or AWS X-Ray)
 - Payment processor (if handling payments)
+
+**AWS Services Eligible for HIPAA:**
+- Amazon ECS (Fargate)
+- Amazon RDS (PostgreSQL)
+- Amazon S3 (with encryption)
+- Amazon EBS (encrypted volumes)
+- AWS Secrets Manager
+- Amazon CloudWatch
+- Amazon VPC
+- AWS Certificate Manager
+- Elastic Load Balancing
+- Amazon ElastiCache (Redis)
+- Amazon SES
+- AWS Lambda
+- Amazon SNS/SQS
 
 #### 7. Incident Response Plan
 

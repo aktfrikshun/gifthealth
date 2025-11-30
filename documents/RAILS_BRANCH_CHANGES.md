@@ -483,12 +483,14 @@ bundle exec rails server
 ### Production Checklist
 
 **Infrastructure:**
-- [ ] Switch from SQLite to PostgreSQL
-- [ ] Enable SSL/TLS (HTTPS)
-- [ ] Configure environment variables
-- [ ] Set up backups (automated, encrypted)
-- [ ] Configure firewall
-- [ ] Enable DDoS protection
+- [ ] Switch from SQLite to Amazon RDS PostgreSQL
+- [ ] Enable SSL/TLS (AWS Certificate Manager)
+- [ ] Configure environment variables (AWS Secrets Manager)
+- [ ] Set up automated RDS backups (encrypted)
+- [ ] Configure Security Groups (firewall)
+- [ ] Enable AWS Shield (DDoS protection)
+- [ ] Set up VPC with private subnets
+- [ ] Configure Application Load Balancer
 
 **Application:**
 - [ ] Implement authentication (Devise)
@@ -497,7 +499,21 @@ bundle exec rails server
 - [ ] Enable audit logging (PaperTrail)
 - [ ] Configure session timeout (15 min)
 - [ ] Add rate limiting (Rack::Attack)
-- [ ] Set up error tracking (Sentry)
+- [ ] Set up error tracking (Sentry/AWS X-Ray)
+
+**Monitoring & Logging:**
+- [ ] CloudWatch Logs for application logs
+- [ ] CloudWatch Metrics for performance monitoring
+- [ ] CloudWatch Alarms for critical events:
+  - High CPU/memory usage (>80%)
+  - Error rate threshold (>5%)
+  - Response time degradation (>2s)
+  - Database connection errors
+  - Failed authentication attempts (>100/min)
+- [ ] CloudWatch Dashboards for visualization
+- [ ] SNS alerts for on-call notifications
+- [ ] AWS X-Ray for distributed tracing
+- [ ] VPC Flow Logs for network monitoring
 
 **HIPAA Compliance (if handling real PHI):**
 - [ ] Encrypt data at rest
@@ -511,19 +527,65 @@ bundle exec rails server
 
 **See [HIPAA_COMPLIANCE.md](../HIPAA_COMPLIANCE.md) for complete guide**
 
-### Example: Heroku Deployment
+### Example: AWS Fargate Deployment
 
+**Dockerfile:**
+```dockerfile
+FROM ruby:3.3-slim
+
+RUN apt-get update -qq && apt-get install -y \
+  build-essential libpq-dev nodejs postgresql-client
+
+WORKDIR /app
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . .
+
+EXPOSE 3000
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
+```
+
+**Deploy to AWS Fargate:**
 ```bash
-# Add Procfile
-echo "web: bundle exec puma -C config/puma.rb" > Procfile
+# Build and push to ECR
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
 
-# Update database.yml for PostgreSQL
-# (See config/database.yml.example)
+docker build -t gifthealth .
+docker tag gifthealth:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/gifthealth:latest
+docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/gifthealth:latest
 
-# Deploy
-git push heroku rails:main
-heroku run rake db:migrate
-heroku open
+# Update ECS service
+aws ecs update-service --cluster gifthealth-cluster \
+  --service gifthealth-service --force-new-deployment
+
+# Run migrations
+aws ecs run-task --cluster gifthealth-cluster \
+  --task-definition gifthealth-migrate \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx],securityGroups=[sg-xxx]}"
+```
+
+**Infrastructure (Terraform example):**
+```hcl
+resource "aws_ecs_cluster" "main" {
+  name = "gifthealth-cluster"
+}
+
+resource "aws_ecs_service" "app" {
+  name            = "gifthealth-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = 2
+  launch_type     = "FARGATE"
+  
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app.arn
+    container_name   = "gifthealth"
+    container_port   = 3000
+  }
+}
 ```
 
 ### Performance Considerations
@@ -576,10 +638,11 @@ heroku open
 - Charts and visualizations
 
 **Performance:**
-- Background jobs (Sidekiq)
-- PostgreSQL migration
-- Redis caching
-- CDN for assets
+- Background jobs (Sidekiq on Fargate)
+- Amazon RDS PostgreSQL with read replicas
+- Amazon ElastiCache for Redis
+- CloudFront CDN for static assets
+- Auto-scaling based on CloudWatch metrics
 
 ### Low Priority
 
@@ -594,9 +657,10 @@ heroku open
 
 - API versioning strategy
 - Pagination for large datasets
-- Request/response logging
-- Monitoring integration (New Relic/Datadog)
-- Code coverage reporting (SimpleCov)
+- Structured logging (JSON format for CloudWatch Insights)
+- CloudWatch Container Insights integration
+- Code coverage reporting (SimpleCov with CodeCov)
+- AWS Cost Explorer integration for budget alerts
 
 ---
 

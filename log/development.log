@@ -3535,3 +3535,120 @@ Processing by DocumentsController#show as HTML
 Completed 200 OK in 7ms (Views: 6.5ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
 
 
+Started GET "/" for 127.0.0.1 at 2025-11-30 16:18:18 -0500
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by PrescriptionsController#index as HTML
+  [1m[36mPatient Load (2.2ms)[0m  [1m[34mSELECT "patients".* FROM "patients"[0m
+  ↳ app/controllers/prescriptions_controller.rb:9:in 'PrescriptionsController#index'
+  [1m[36mPrescription Load (0.5ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" IN (?, ?, ?, ?)[0m  [["patient_id", 17], ["patient_id", 18], ["patient_id", 19], ["patient_id", 20]]
+  ↳ app/controllers/prescriptions_controller.rb:9:in 'PrescriptionsController#index'
+  [1m[36mPrescription Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 17], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  [1m[36mPrescription Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 18], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  [1m[36mPrescription Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 19], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  [1m[36mPrescription Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 20], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  Rendering layout layouts/application.html.erb
+  Rendering prescriptions/index.html.erb within layouts/application
+  [1m[36mPrescription Load (0.2ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ?[0m  [["patient_id", 18], ["created", 1]]
+  ↳ app/views/prescriptions/index.html.erb:77
+  [1m[36mPrescription Load (0.1ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ?[0m  [["patient_id", 19], ["created", 1]]
+  ↳ app/views/prescriptions/index.html.erb:77
+  [1m[36mPrescription Load (0.1ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ?[0m  [["patient_id", 17], ["created", 1]]
+  ↳ app/views/prescriptions/index.html.erb:77
+  Rendered prescriptions/index.html.erb within layouts/application (Duration: 59.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 64.9ms | GC: 0.0ms)
+Completed 200 OK in 181ms (Views: 67.5ms | ActiveRecord: 3.8ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/documents/RAILS_BRANCH_CHANGES" for 127.0.0.1 at 2025-11-30 16:18:26 -0500
+Processing by DocumentsController#show as HTML
+  Parameters: {"name" => "RAILS_BRANCH_CHANGES"}
+  Rendering layout layouts/application.html.erb
+  Rendering documents/show.html.erb within layouts/application
+  Rendered documents/show.html.erb within layouts/application (Duration: 16.6ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 26.5ms | GC: 0.0ms)
+Completed 200 OK in 35ms (Views: 30.1ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/documents/erd-diagram.svg" for 127.0.0.1 at 2025-11-30 16:18:26 -0500
+Processing by DocumentsController#show as SVG
+  Parameters: {"name" => "erd-diagram"}
+Sent file /home/allen/src/gifthealth/documents/erd-diagram.svg (1.4ms)
+Completed 200 OK in 2ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/documents/RAILS_BRANCH_CHANGES" for 127.0.0.1 at 2025-11-30 16:24:58 -0500
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by DocumentsController#show as */*
+  Parameters: {"name" => "RAILS_BRANCH_CHANGES"}
+  Rendering layout layouts/application.html.erb
+  Rendering documents/show.html.erb within layouts/application
+  Rendered documents/show.html.erb within layouts/application (Duration: 1.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 14.1ms | GC: 0.0ms)
+Completed 200 OK in 33ms (Views: 30.9ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/" for 127.0.0.1 at 2025-11-30 16:25:09 -0500
+Processing by PrescriptionsController#index as HTML
+  [1m[36mPatient Load (1.0ms)[0m  [1m[34mSELECT "patients".* FROM "patients"[0m
+  ↳ app/controllers/prescriptions_controller.rb:9:in 'PrescriptionsController#index'
+  [1m[36mPrescription Load (0.3ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" IN (?, ?, ?, ?)[0m  [["patient_id", 17], ["patient_id", 18], ["patient_id", 19], ["patient_id", 20]]
+  ↳ app/controllers/prescriptions_controller.rb:9:in 'PrescriptionsController#index'
+  [1m[36mPrescription Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 17], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  [1m[36mPrescription Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 18], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  [1m[36mPrescription Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 19], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  [1m[36mPrescription Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ? LIMIT ?[0m  [["patient_id", 20], ["created", 1], ["LIMIT", 1]]
+  ↳ app/models/patient.rb:55:in 'Patient#has_created_prescriptions?'
+  Rendering layout layouts/application.html.erb
+  Rendering prescriptions/index.html.erb within layouts/application
+  [1m[36mPrescription Load (0.2ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ?[0m  [["patient_id", 18], ["created", 1]]
+  ↳ app/views/prescriptions/index.html.erb:77
+  [1m[36mPrescription Load (0.1ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ?[0m  [["patient_id", 19], ["created", 1]]
+  ↳ app/views/prescriptions/index.html.erb:77
+  [1m[36mPrescription Load (0.1ms)[0m  [1m[34mSELECT "prescriptions".* FROM "prescriptions" WHERE "prescriptions"."patient_id" = ? AND "prescriptions"."created" = ?[0m  [["patient_id", 17], ["created", 1]]
+  ↳ app/views/prescriptions/index.html.erb:77
+  Rendered prescriptions/index.html.erb within layouts/application (Duration: 14.6ms | GC: 0.7ms)
+  Rendered layout layouts/application.html.erb (Duration: 16.5ms | GC: 0.7ms)
+Completed 200 OK in 122ms (Views: 16.8ms | ActiveRecord: 3.9ms (9 queries, 0 cached) | GC: 17.3ms)
+
+
+Started GET "/documents/RAILS_BRANCH_CHANGES" for 127.0.0.1 at 2025-11-30 16:25:14 -0500
+Processing by DocumentsController#show as HTML
+  Parameters: {"name" => "RAILS_BRANCH_CHANGES"}
+  Rendering layout layouts/application.html.erb
+  Rendering documents/show.html.erb within layouts/application
+  Rendered documents/show.html.erb within layouts/application (Duration: 0.4ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 3.4ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 4.8ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/documents/erd-diagram.svg" for 127.0.0.1 at 2025-11-30 16:25:14 -0500
+Processing by DocumentsController#show as SVG
+  Parameters: {"name" => "erd-diagram"}
+Sent file /home/allen/src/gifthealth/documents/erd-diagram.svg (0.5ms)
+Completed 200 OK in 2ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/documents/RAILS_BRANCH_CHANGES" for 127.0.0.1 at 2025-11-30 16:25:43 -0500
+Processing by DocumentsController#show as HTML
+  Parameters: {"name" => "RAILS_BRANCH_CHANGES"}
+  Rendering layout layouts/application.html.erb
+  Rendering documents/show.html.erb within layouts/application
+  Rendered documents/show.html.erb within layouts/application (Duration: 0.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 2.9ms | GC: 0.3ms)
+Completed 200 OK in 5ms (Views: 4.2ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.3ms)
+
+
+Started GET "/documents/erd-diagram.svg" for 127.0.0.1 at 2025-11-30 16:25:43 -0500
+Processing by DocumentsController#show as SVG
+  Parameters: {"name" => "erd-diagram"}
+Sent file /home/allen/src/gifthealth/documents/erd-diagram.svg (0.1ms)
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
