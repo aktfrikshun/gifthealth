@@ -88,9 +88,9 @@
 
     <div class="d-flex justify-content-between mt-4">
       <%= link_to 'Cancel', prescriptions_path, class: 'btn btn-secondary' %>
-      <div>
-        <%= button_to 'Delete', prescription_path(@prescription), method: :delete, class: 'btn btn-danger me-2', data: { turbo_confirm: 'Are you sure you want to delete this prescription?' } %>
+      <div class="d-flex gap-2">
         <%= form.submit 'Update Prescription', class: 'btn btn-pharmacy' %>
+        <%= button_to 'Delete', prescription_path(@prescription), method: :delete, form: { class: 'd-inline' }, class: 'btn btn-danger', data: { turbo_confirm: 'Are you sure you want to delete this prescription?' } %>
       </div>
     </div>
   <% end %>
