@@ -1,0 +1,357 @@
+name: HIPAA Compliance
+
+on:
+  push:
+    branches: [ main, rails ]
+  pull_request:
+    branches: [ main, rails ]
+  schedule:
+    # Run compliance checks every day at 3am UTC
+    - cron: '0 3 * * *'
+
+jobs:
+  phi-detection:
+    name: PHI Detection Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better detection
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install detect-secrets
+      run: |
+        pip install detect-secrets
+        pip install gibberish-detector
+
+    - name: Scan for PHI and Secrets
+      run: |
+        # Create baseline if doesn't exist
+        if [ ! -f .secrets.baseline ]; then
+          detect-secrets scan --baseline .secrets.baseline
+        fi
+        
+        # Scan for new secrets/PHI
+        detect-secrets scan --baseline .secrets.baseline \
+          --exclude-files '\.git/.*' \
+          --exclude-files 'node_modules/.*' \
+          --exclude-files 'vendor/.*'
+        
+        # Audit the baseline
+        detect-secrets audit .secrets.baseline
+
+    - name: Install Nightfall AI (PHI Detection)
+      run: |
+        curl -s https://raw.githubusercontent.com/nightfallai/nightfall_code_scanner/main/install.sh | bash
+
+    - name: Run Nightfall PHI Scanner
+      env:
+        NIGHTFALL_API_KEY: ${{ secrets.NIGHTFALL_API_KEY }}
+      run: |
+        # Scan for PHI patterns (SSN, Medical Record Numbers, DOB, etc.)
+        if [ -n "$NIGHTFALL_API_KEY" ]; then
+          nightfall scan --all
+        else
+          echo "⚠️  Nightfall API key not configured. Skipping Nightfall scan."
+          echo "ℹ️  To enable: Add NIGHTFALL_API_KEY to repository secrets"
+        fi
+      continue-on-error: true
+
+    - name: Custom PHI Pattern Detection
+      run: |
+        echo "🔍 Scanning for common PHI patterns..."
+        
+        # Check for SSN patterns
+        if grep -r -E '\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b' app/ spec/ --exclude-dir=node_modules; then
+          echo "❌ Found potential SSN patterns in code"
+          exit 1
+        fi
+        
+        # Check for medical record number patterns
+        if grep -r -E '\bMRN[:\s]*[0-9]{6,}\b' app/ spec/ --exclude-dir=node_modules; then
+          echo "❌ Found potential Medical Record Numbers in code"
+          exit 1
+        fi
+        
+        # Check for credit card patterns
+        if grep -r -E '\b[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b' app/ spec/ --exclude-dir=node_modules; then
+          echo "❌ Found potential credit card numbers in code"
+          exit 1
+        fi
+        
+        # Check for email addresses in logs or data files
+        if grep -r -E '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b' spec/fixtures/ db/seeds/ 2>/dev/null | grep -v '.md:' | grep -v 'example.com' | grep -v 'test.com'; then
+          echo "⚠️  Found real email addresses in test data - use example.com domains only"
+        fi
+        
+        echo "✅ No obvious PHI patterns detected"
+
+  hipaa-security-controls:
+    name: HIPAA Security Controls Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Check for Security Gems
+      run: |
+        echo "📋 Checking required HIPAA security gems..."
+        
+        # Check for required security gems
+        required_gems=(
+          "rack-attack"
+          "secure_headers"
+          "devise"
+        )
+        
+        for gem in "${required_gems[@]}"; do
+          if grep -q "gem ['\"]$gem['\"]" Gemfile; then
+            echo "✅ Found: $gem"
+          else
+            echo "⚠️  Missing recommended gem: $gem"
+          fi
+        done
+
+    - name: Check Encryption Configuration
+      run: |
+        echo "🔐 Checking encryption settings..."
+        
+        # Check for force_ssl in production
+        if grep -q "config.force_ssl = true" config/environments/production.rb; then
+          echo "✅ SSL/TLS enforcement enabled"
+        else
+          echo "❌ HIPAA Requirement: SSL/TLS must be enforced in production"
+          echo "   Add: config.force_ssl = true to production.rb"
+          exit 1
+        fi
+        
+        # Check for encrypted credentials
+        if [ -f "config/credentials.yml.enc" ]; then
+          echo "✅ Encrypted credentials file found"
+        else
+          echo "⚠️  No encrypted credentials found. Run: rails credentials:edit"
+        fi
+
+    - name: Database Security Check
+      run: |
+        echo "💾 Checking database security..."
+        
+        # Check for database encryption
+        if grep -q "encryption" config/database.yml || grep -q "sslmode" config/database.yml; then
+          echo "✅ Database encryption configured"
+        else
+          echo "⚠️  HIPAA Requirement: Database connections should use encryption"
+        fi
+        
+        # Check for database.yml in gitignore
+        if grep -q "config/database.yml" .gitignore; then
+          echo "✅ database.yml properly gitignored"
+        else
+          echo "❌ HIPAA Requirement: database.yml should be in .gitignore"
+          exit 1
+        fi
+
+    - name: Session Security Check
+      run: |
+        echo "🔑 Checking session configuration..."
+        
+        # Check for secure session settings
+        if grep -q "secure: true" config/initializers/session_store.rb 2>/dev/null || \
+           grep -q "config.force_ssl = true" config/environments/production.rb; then
+          echo "✅ Secure session cookies configured"
+        else
+          echo "⚠️  HIPAA Requirement: Session cookies must have secure flag"
+        fi
+
+    - name: Audit Logging Check
+      run: |
+        echo "📝 Checking audit logging..."
+        
+        # Check for paper_trail or audited gem
+        if grep -q "gem ['\"]paper_trail['\"]" Gemfile || \
+           grep -q "gem ['\"]audited['\"]" Gemfile || \
+           grep -q "gem ['\"]lograge['\"]" Gemfile; then
+          echo "✅ Audit logging gem found"
+        else
+          echo "⚠️  HIPAA Requirement: Implement audit logging for all PHI access"
+          echo "   Recommended: paper_trail, audited, or lograge gem"
+        fi
+
+  access-control:
+    name: Access Control & Authentication
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Check Authentication
+      run: |
+        echo "🔐 Checking authentication implementation..."
+        
+        # Check for authentication gems
+        if grep -q "gem ['\"]devise['\"]" Gemfile || \
+           grep -q "gem ['\"]authlogic['\"]" Gemfile || \
+           grep -q "gem ['\"]sorcery['\"]" Gemfile; then
+          echo "✅ Authentication gem found"
+        else
+          echo "❌ HIPAA Requirement: User authentication must be implemented"
+          echo "   Recommended: devise gem"
+          exit 1
+        fi
+
+    - name: Check Authorization
+      run: |
+        echo "👮 Checking authorization implementation..."
+        
+        # Check for authorization gems
+        if grep -q "gem ['\"]pundit['\"]" Gemfile || \
+           grep -q "gem ['\"]cancancan['\"]" Gemfile; then
+          echo "✅ Authorization gem found"
+        else
+          echo "⚠️  HIPAA Requirement: Role-based access control recommended"
+          echo "   Recommended: pundit or cancancan gem"
+        fi
+
+    - name: API Authentication Check
+      run: |
+        echo "🔌 Checking API authentication..."
+        
+        # Check if API has authentication
+        if grep -r "before_action :authenticate" app/controllers/api/ 2>/dev/null || \
+           grep -r "doorkeeper" Gemfile; then
+          echo "✅ API authentication found"
+        else
+          echo "❌ HIPAA Requirement: API endpoints must require authentication"
+          echo "   Current API endpoints have no authentication!"
+          exit 1
+        fi
+
+  data-retention:
+    name: Data Retention Policy Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check for Data Retention Policies
+      run: |
+        echo "📅 Checking data retention policies..."
+        
+        # Check for retention policy documentation
+        if [ -f "HIPAA_COMPLIANCE.md" ] || [ -f "docs/data_retention.md" ]; then
+          echo "✅ Data retention policy documented"
+        else
+          echo "⚠️  HIPAA Requirement: Document data retention policies"
+          echo "   Create HIPAA_COMPLIANCE.md with retention policies"
+        fi
+        
+        # Check for automated cleanup tasks
+        if [ -f "lib/tasks/cleanup.rake" ] || grep -r "delete_old" lib/tasks/; then
+          echo "✅ Data cleanup tasks found"
+        else
+          echo "⚠️  HIPAA Recommendation: Implement automated data cleanup"
+        fi
+
+  dependency-vulnerability:
+    name: Dependency Vulnerabilities (HIPAA)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Install and Run bundler-audit
+      run: |
+        gem install bundler-audit
+        bundle audit --update
+        bundle audit
+
+    - name: OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'gifthealth'
+        path: '.'
+        format: 'HTML'
+
+    - name: Upload OWASP Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: owasp-dependency-check-report
+        path: reports/
+
+  compliance-report:
+    name: Generate Compliance Report
+    runs-on: ubuntu-latest
+    needs: [phi-detection, hipaa-security-controls, access-control, data-retention]
+    if: always()
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Generate Compliance Summary
+      run: |
+        cat > compliance-report.md << 'EOF'
+        # HIPAA Compliance Report
+        
+        **Date:** $(date)
+        **Branch:** ${{ github.ref_name }}
+        **Commit:** ${{ github.sha }}
+        
+        ## Scan Results
+        
+        - PHI Detection: ${{ needs.phi-detection.result }}
+        - Security Controls: ${{ needs.hipaa-security-controls.result }}
+        - Access Control: ${{ needs.access-control.result }}
+        - Data Retention: ${{ needs.data-retention.result }}
+        
+        ## Next Steps
+        
+        Review any failures above and address before deploying to production.
+        
+        ## HIPAA Compliance Checklist
+        
+        - [ ] All PHI encrypted at rest
+        - [ ] All PHI encrypted in transit (SSL/TLS)
+        - [ ] User authentication implemented
+        - [ ] Role-based access control
+        - [ ] Audit logging for all PHI access
+        - [ ] Automatic session timeout
+        - [ ] Password complexity requirements
+        - [ ] Data backup procedures
+        - [ ] Business Associate Agreements (BAA) in place
+        - [ ] Incident response plan documented
+        - [ ] Regular security training
+        - [ ] Risk assessment completed
+        
+        EOF
+        
+        cat compliance-report.md
+
+    - name: Upload Compliance Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: hipaa-compliance-report
+        path: compliance-report.md

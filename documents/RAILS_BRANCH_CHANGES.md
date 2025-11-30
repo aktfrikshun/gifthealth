@@ -13,7 +13,8 @@ This document describes all changes implemented in the `rails` branch, which add
 7. [Testing Updates](#testing-updates)
 8. [Performance Considerations](#performance-considerations)
 9. [Migration Guide](#migration-guide)
-10. [Future Enhancements](#future-enhancements)
+10. [CI/CD and Git Workflow](#cicd-and-git-workflow)
+11. [Future Enhancements](#future-enhancements)
 
 ---
 
@@ -622,6 +623,278 @@ bundle exec rake import:legacy_data
 
 ---
 
+## CI/CD and Git Workflow
+
+### GitHub Actions Workflows
+
+The project includes three automated workflows for continuous integration, security scanning, and code quality:
+
+#### 1. CI Workflow (`.github/workflows/ci.yml`)
+
+**Triggers:**
+- Push to `main` or `rails` branches
+- Pull requests targeting `main` or `rails` branches
+
+**Jobs:**
+
+**Test Job:**
+- Runs on: Ubuntu Latest
+- Ruby Version: 3.3
+- Database: PostgreSQL 15 (for compatibility testing)
+- Steps:
+  1. Checkout code
+  2. Set up Ruby with bundler cache
+  3. Install system dependencies (libsqlite3-dev)
+  4. Create and migrate test database
+  5. Run full RSpec test suite
+  6. Run RuboCop linter
+
+**Lint Job:**
+- Runs on: Ubuntu Latest
+- Ruby Version: 3.3
+- Steps:
+  1. Checkout code
+  2. Set up Ruby with bundler cache
+  3. Run RuboCop in parallel mode
+
+**Status Badge:**
+```markdown
+![CI](https://github.com/aktfrikshun/gifthealth/actions/workflows/ci.yml/badge.svg)
+```
+
+#### 2. Security Workflow (`.github/workflows/security.yml`)
+
+**Triggers:**
+- Push to `main` or `rails` branches
+- Pull requests targeting `main` or `rails` branches
+- Weekly schedule: Mondays at 8:00 AM UTC
+
+**Jobs:**
+
+**Bundler Audit:**
+- Checks for vulnerable gem versions
+- Updates CVE database before scanning
+- Fails on any known vulnerabilities
+- Verbose output for debugging
+
+**Brakeman:**
+- Static security analysis for Rails applications
+- Scans for:
+  - SQL injection vulnerabilities
+  - Cross-site scripting (XSS)
+  - Command injection
+  - Mass assignment issues
+  - Unsafe redirects
+  - Authentication flaws
+- Plain text output format
+
+**Dependency Review:**
+- Only runs on pull requests
+- Analyzes dependency changes
+- Fails on moderate or higher severity issues
+- Helps prevent introducing vulnerable dependencies
+
+**Status Badge:**
+```markdown
+![Security](https://github.com/aktfrikshun/gifthealth/actions/workflows/security.yml/badge.svg)
+```
+
+#### 3. CodeQL Workflow (`.github/workflows/codeql.yml`)
+
+**Triggers:**
+- Push to `main` or `rails` branches
+- Pull requests targeting `main` or `rails` branches
+- Weekly schedule: Wednesdays at 2:00 AM UTC
+
+**Languages Analyzed:**
+- Ruby
+- JavaScript
+
+**Analysis Type:**
+- Security queries
+- Code quality queries
+
+**Features:**
+- Matrix strategy for multi-language analysis
+- Autobuild for automatic compilation
+- Results published to GitHub Security tab
+- Separate categories per language
+
+**Status Badge:**
+```markdown
+![CodeQL](https://github.com/aktfrikshun/gifthealth/actions/workflows/codeql.yml/badge.svg)
+```
+
+### Branch Strategy
+
+**Main Branch:**
+- Original CLI implementation
+- Plain Ruby with POROs
+- In-memory data storage
+- No database dependencies
+
+**Rails Branch:**
+- Rails 8 web application
+- Database persistence (SQLite/PostgreSQL)
+- Web interface + REST API
+- Enhanced features
+
+**Workflow:**
+```bash
+# Start from rails branch
+git checkout rails
+
+# Create feature branch
+git checkout -b feature/new-feature
+
+# Make changes, commit
+git add .
+git commit -m "Add new feature"
+
+# Push and create PR
+git push origin feature/new-feature
+
+# CI/CD runs automatically:
+# - All tests must pass
+# - No RuboCop violations
+# - No security vulnerabilities
+# - CodeQL analysis clean
+
+# After PR approval, merge to rails
+git checkout rails
+git merge feature/new-feature
+git push origin rails
+```
+
+### Code Quality Standards
+
+**Enforced by CI:**
+- Zero RuboCop offenses
+- All RSpec tests passing (62 tests)
+- No security vulnerabilities
+- Clean CodeQL analysis
+- No dependency issues
+
+**RuboCop Configuration:**
+```yaml
+# .rubocop.yml
+Metrics/AbcSize:
+  Max: 36
+
+Metrics/MethodLength:
+  Max: 40
+  Exclude:
+    - 'app/controllers/**/*'
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/BlockLength:
+  Exclude:
+    - 'config/routes.rb'
+    - 'spec/**/*'
+```
+
+### Security Scanning Schedule
+
+**Weekly Scans:**
+- **Mondays 8 AM UTC**: Full security audit (bundler-audit + Brakeman)
+- **Wednesdays 2 AM UTC**: CodeQL analysis
+
+**On-Demand:**
+- Every push to main/rails branches
+- Every pull request
+
+**Notifications:**
+- GitHub Actions UI
+- Email alerts (configurable)
+- Security tab updates
+
+### Pull Request Checklist
+
+Before merging:
+- [ ] All CI tests pass
+- [ ] RuboCop clean (0 offenses)
+- [ ] No security vulnerabilities
+- [ ] CodeQL analysis complete
+- [ ] Code reviewed by team member
+- [ ] Documentation updated
+- [ ] CHANGELOG updated (if applicable)
+
+### Local Development Workflow
+
+```bash
+# Before committing
+bundle exec rspec              # Run all tests
+bundle exec rubocop            # Check code style
+bundle exec rubocop -a         # Auto-fix violations
+bundle audit                   # Check for vulnerabilities
+brakeman                       # Security scan
+
+# Commit if all pass
+git add .
+git commit -m "Descriptive message"
+git push origin feature-branch
+
+# CI will run automatically
+```
+
+### Monitoring CI/CD
+
+**GitHub Actions Dashboard:**
+```
+https://github.com/aktfrikshun/gifthealth/actions
+```
+
+**Workflow Status:**
+- Green checkmark: All checks passed
+- Red X: Failures detected
+- Yellow dot: In progress
+
+**View Details:**
+- Click workflow run
+- Expand job steps
+- Review logs for failures
+- Download artifacts (if any)
+
+### CI/CD Improvements
+
+**Planned Enhancements:**
+1. **Deployment Automation**
+   - Auto-deploy to staging on rails branch push
+   - Manual approval for production deployment
+   - Heroku or AWS integration
+
+2. **Performance Testing**
+   - Add performance benchmarks to CI
+   - Fail if performance degrades beyond threshold
+   - Track metrics over time
+
+3. **Code Coverage**
+   - Add SimpleCov integration
+   - Enforce minimum coverage threshold (e.g., 90%)
+   - Upload coverage reports to Codecov
+
+4. **Parallel Testing**
+   - Split test suite for faster runs
+   - Use parallel RSpec execution
+   - Reduce total CI time
+
+5. **Docker Integration**
+   - Build Docker images in CI
+   - Push to container registry
+   - Enable containerized deployments
+
+6. **Notifications**
+   - Slack integration for build status
+   - Email alerts for security findings
+   - Discord webhooks
+
+---
+
 ## Future Enhancements
 
 ### Planned Features
@@ -1016,6 +1289,9 @@ This Rails implementation transforms the GiftHealth prescription processor from 
 - ✅ **Full CRUD interface for data management**
 - ✅ **Patient management tools**
 - ✅ **Quick action buttons for common operations**
+- ✅ **GitHub Actions CI/CD pipeline**
+- ✅ **Automated security scanning**
+- ✅ **Code quality enforcement**
 
 The foundation is now in place for future enhancements including user authentication, advanced reporting, and enterprise features.
 
