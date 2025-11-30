@@ -26,7 +26,7 @@ This document describes the transformation of GiftHealth from a CLI tool into a 
 | **Interface** | Command-line only | Web UI + REST API + CLI |
 | **File Support** | Text files | CSV, Excel, TXT |
 | **Operations** | Read-only processing | Full CRUD capabilities |
-| **Testing** | 48 RSpec tests | 62 RSpec tests + CI/CD |
+| **Testing** | 48 RSpec tests | 73 RSpec tests + CI/CD |
 | **Security** | N/A | Automated scanning + HIPAA checks |
 
 ### Quick Start
@@ -69,6 +69,9 @@ gem 'stimulus-rails', '~> 1.3'    # JavaScript framework
 gem 'roo', '~> 2.10'              # Excel parsing
 gem 'roo-xls', '~> 1.2'           # Legacy Excel
 
+# External APIs
+# Uses NIH RxNorm API (no gem needed, uses Net::HTTP)
+
 # Documentation
 gem 'redcarpet', '~> 3.6'         # Markdown rendering
 gem 'rouge', '~> 4.6'             # Syntax highlighting
@@ -95,7 +98,8 @@ app/
 │   └── prescription.rb                # ActiveRecord
 ├── services/
 │   ├── prescription_event_processor.rb # Business logic
-│   └── file_parser_service.rb         # File upload handling
+│   ├── file_parser_service.rb         # File upload handling
+│   └── rx_norm_service.rb             # NIH RxNorm API integration
 ├── views/
 │   ├── prescriptions/
 │   │   ├── index.html.erb            # Main dashboard
@@ -106,6 +110,9 @@ app/
 │   └── documents/
 │       ├── show.html.erb             # Markdown viewer
 │       └── erd.html.erb              # ERD viewer with zoom/pan
+├── javascript/
+│   └── controllers/
+│       └── drug_autocomplete_controller.js  # Stimulus typeahead
 └── assets/
     └── stylesheets/
         └── application.css           # Pharmacy-themed design
@@ -222,13 +229,20 @@ end
 ### 2. CRUD Operations
 
 **Prescriptions** (`/prescriptions`)
-- **Create**: Add new prescriptions manually
+- **Create**: Add new prescriptions manually with drug name autocomplete
 - **Read**: View all prescriptions with statistics
 - **Update**: Edit fill counts, drug names, status
 - **Delete**: Remove prescriptions (auto-cleans patients)
 - **Quick Actions**: 
   - Increment fill (+ button)
   - Decrement fill/return (- button)
+
+**Drug Name Validation:**
+- Real-time autocomplete powered by NIH RxNorm API
+- Type-ahead search with debouncing (300ms)
+- Keyboard navigation support (arrow keys, Enter, Escape)
+- Validates against ~150,000+ drug names
+- No API key required (free NIH service)
 
 **Patients** (`/patients`)
 - View all patients with aggregated statistics
@@ -238,6 +252,26 @@ end
 ### 3. REST API
 
 **Base URL:** `/api/v1`
+
+**Drug Name Autocomplete:**
+```bash
+GET /api/v1/drugs/autocomplete?query=aspir
+
+# Response: 200 OK
+[
+  {"name": "aspirin", "display": "aspirin", "rxcui": "1191"},
+  {"name": "aspirin 81 MG", "display": "aspirin 81 MG", "rxcui": "1295740"},
+  {"name": "aspirin 325 MG", "display": "aspirin 325 MG", "rxcui": "1537031"}
+]
+```
+
+**Validate Drug Name:**
+```bash
+GET /api/v1/drugs/validate?name=aspirin
+
+# Response: 200 OK
+{"valid": true, "rxcui": "1191"}
+```
 
 **Create Single Event:**
 ```bash
@@ -322,16 +356,22 @@ cat data.txt | ./bin/prescription_processor
 
 ### Test Coverage
 
-**62 RSpec Tests:**
+**73 RSpec Tests:**
 - 18 Prescription model tests
 - 10 Patient model tests  
 - 13 PrescriptionEventProcessor tests
 - 14 CRUD operation tests
+- 11 RxNormService tests (with WebMock for API stubbing)
 - 3 CLI tests
 - 2 Integration tests
 - 2 Performance tests
 
 **All tests passing** ✅
+
+**WebMock Integration:**
+- Stubs NIH RxNorm API calls for fast, reliable tests
+- No external API calls during test suite
+- Validates API response parsing and error handling
 
 ### Database Cleaner Strategy
 

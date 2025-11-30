@@ -302,7 +302,10 @@ If this were to be extended, potential improvements could include:
 1. **Error Reporting**: More detailed error messages for invalid events
 2. **Logging**: Add logging for debugging and audit trails
 3. **Configuration**: Make income amounts ($5 per fill, $1 per return) configurable
-4. **Drug-Based Pricing**: Allow for the creation of Drug entities with associated name and pricing:
+4. **Drug Catalog Management**: Expand on the current RxNorm integration:
+   - ✅ **Implemented**: Drug name validation with NIH RxNorm API autocomplete
+   - **Future**: Cache frequently used drugs locally for faster lookup
+   - **Future**: Drug-based pricing with Drug entities:
    - **Drug Model**: Create a Drug entity with:
      - Drug name/identifier
      - Fill price (revenue per fill)
@@ -334,7 +337,19 @@ If this were to be extended, potential improvements could include:
      - Ability to debug issues by reviewing event history
      - Support for event replay and reprocessing
      - Historical analysis and reporting capabilities
-9. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
+9. **Drug Name Validation** ✅ **Implemented in Rails Branch**:
+   - **Real-time Autocomplete**: Type-ahead search powered by NIH RxNorm API
+   - **Comprehensive Database**: Access to 150,000+ drug names
+   - **Smart Search**: Uses approximateTerm API for flexible matching
+   - **User-Friendly**: Keyboard navigation, debounced search (300ms)
+   - **Free Service**: No API key required
+   - **Implementation**:
+     - `RxNormService`: API integration service
+     - `API::V1::DrugsController`: REST endpoints for autocomplete/validation
+     - Stimulus.js controller for interactive typeahead UI
+     - WebMock integration for reliable testing
+
+10. **Web Interface & Serverless Deployment**: Transform into a stateless, serverless utility with:
    - **Web Interface**: RESTful API and web UI for receiving input via file uploads or direct API calls
    - **Event Ingestion**: Use asynchronous event ingestion such as AWS SQS (Simple Queue Service), enabling:
      - Decoupled architecture with producers and consumers
