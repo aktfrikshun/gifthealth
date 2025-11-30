@@ -37,3 +37,4 @@ gem 'webmock', '~> 3.23'
 
 # Code quality (optional)
 gem 'rubocop', '~> 1.57', require: false
+gem 'rubocop-rspec', '~> 3.0', require: false
