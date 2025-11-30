@@ -86,11 +86,8 @@
       Net Fills: <%= @prescription.net_fills %> | Income: $<%= @prescription.income %>
     </div>
 
-    <div class="d-flex justify-content-between mt-4">
-      <%= link_to 'Cancel', prescriptions_path, class: 'btn btn-secondary' %>
-      <div class="d-flex gap-2">
-        <%= form.submit 'Update Prescription', class: 'btn btn-pharmacy' %>
-      </div>
+    <div class="mt-4">
+      <%= form.submit 'Update Prescription', class: 'btn btn-pharmacy' %>
     </div>
   <% end %>
 
