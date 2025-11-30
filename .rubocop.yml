@@ -6,6 +6,8 @@ AllCops:
     - 'spec/examples.txt'
     - 'bin/**/*'
     - 'db/schema.rb'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
 
 Style/StringLiterals:
   EnforcedStyle: single_quotes
