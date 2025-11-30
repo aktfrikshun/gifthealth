@@ -3,11 +3,13 @@
 require 'redcarpet'
 require 'cgi'
 
-# Custom renderer to ensure proper code block formatting
+# Custom renderer to ensure proper code block formatting with preserved whitespace
 class CustomHTMLRenderer < Redcarpet::Render::HTML
   def block_code(code, language)
     lang_class = language ? " class=\"language-#{language}\"" : ''
-    "<pre><code#{lang_class}>#{CGI.escapeHTML(code)}</code></pre>"
+    # Preserve whitespace by escaping HTML but keeping all whitespace intact
+    escaped_code = code.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').gsub('"', '&quot;')
+    "<pre><code#{lang_class}>#{escaped_code}</code></pre>"
   end
 end
 
