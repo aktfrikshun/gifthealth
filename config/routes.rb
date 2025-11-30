@@ -33,6 +33,10 @@ Rails.application.routes.draw do
           post :batch
         end
       end
+
+      # Drug name autocomplete via RxNorm API
+      get 'drugs/autocomplete', to: 'drugs#autocomplete'
+      get 'drugs/validate', to: 'drugs#validate'
     end
   end
 end

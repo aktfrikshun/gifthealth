@@ -84,3 +84,39 @@ input[list] {
 .alert-info strong {
   color: var(--pharmacy-secondary);
 }
+
+/* Drug autocomplete dropdown */
+.autocomplete-results {
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--pharmacy-primary);
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-top: -1px;
+}
+
+.autocomplete-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.15s ease;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+  background-color: var(--pharmacy-light);
+  color: var(--pharmacy-primary);
+}
+
+[data-controller="drug-autocomplete"] {
+  position: relative;
+}
+

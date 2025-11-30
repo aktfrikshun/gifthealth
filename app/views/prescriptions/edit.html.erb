@@ -39,7 +39,18 @@
         <%= form.label :drug_name, class: 'form-label fw-bold' do %>
           <i class="fas fa-pills me-2"></i>Drug Name
         <% end %>
-        <%= form.text_field :drug_name, class: 'form-control', placeholder: 'Enter drug name', required: true %>
+        <div data-controller="drug-autocomplete">
+          <%= form.text_field :drug_name, 
+              class: 'form-control', 
+              placeholder: 'Type to search drug names...', 
+              required: true,
+              data: { 
+                drug_autocomplete_target: 'input',
+                action: 'input->drug-autocomplete#search keydown->drug-autocomplete#navigate'
+              } %>
+          <div data-drug-autocomplete-target="results" class="autocomplete-results d-none"></div>
+        </div>
+        <small class="text-muted">Start typing to search RxNorm drug database</small>
       </div>
     </div>
 

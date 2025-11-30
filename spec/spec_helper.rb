@@ -6,6 +6,7 @@ require 'rspec/rails'
 require 'factory_bot'
 require 'faker'
 require 'database_cleaner/active_record'
+require 'webmock/rspec'
 
 # Explicitly require application classes
 require_relative '../app/handlers/cli'
@@ -23,6 +24,9 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
   end
+
+  # WebMock configuration
+  WebMock.disable_net_connect!(allow_localhost: true)
 
   # Database cleaner configuration
   config.before(:suite) do
