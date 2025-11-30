@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Prescription do
-  let(:patient) { Patient.new('John') }
-  let(:prescription) { Prescription.new(patient: patient, drug_name: 'A') }
+  let(:patient) { create(:patient, name: 'John') }
+  let(:prescription) { create(:prescription, patient: patient, drug_name: 'A') }
 
   describe '#created?' do
     it 'returns false initially' do
@@ -13,6 +13,7 @@ RSpec.describe Prescription do
 
     it 'returns true after marking as created' do
       prescription.mark_created
+      prescription.reload
       expect(prescription.created?).to be true
     end
   end
@@ -20,12 +21,15 @@ RSpec.describe Prescription do
   describe '#fill' do
     it 'returns nil if prescription is not created' do
       expect(prescription.fill).to be_nil
+      prescription.reload
       expect(prescription.net_fills).to eq(0)
     end
 
     it 'increments fill count after creation' do
       prescription.mark_created
-      expect(prescription.fill).to eq(prescription)
+      result = prescription.fill
+      expect(result).to eq(prescription)
+      prescription.reload
       expect(prescription.net_fills).to eq(1)
     end
 
@@ -33,6 +37,7 @@ RSpec.describe Prescription do
       prescription.mark_created
       prescription.fill
       prescription.fill
+      prescription.reload
       expect(prescription.net_fills).to eq(2)
     end
   end
@@ -51,7 +56,9 @@ RSpec.describe Prescription do
       prescription.mark_created
       prescription.fill
       prescription.fill
-      expect(prescription.return_fill).to eq(prescription)
+      result = prescription.return_fill
+      expect(result).to eq(prescription)
+      prescription.reload
       expect(prescription.net_fills).to eq(1)
     end
 
@@ -59,6 +66,7 @@ RSpec.describe Prescription do
       prescription.mark_created
       prescription.fill
       prescription.return_fill
+      prescription.reload
       expect(prescription.return_fill).to be_nil
       expect(prescription.net_fills).to eq(0)
     end
@@ -72,8 +80,10 @@ RSpec.describe Prescription do
     it 'returns $5 per net fill' do
       prescription.mark_created
       prescription.fill
+      prescription.reload
       expect(prescription.income).to eq(5) # 1 net fill * 5 - 0 returns * 1
       prescription.fill
+      prescription.reload
       expect(prescription.income).to eq(10) # 2 net fills * 5 - 0 returns * 1
     end
 
@@ -82,6 +92,7 @@ RSpec.describe Prescription do
       prescription.fill
       prescription.fill
       prescription.return_fill
+      prescription.reload
       # 2 fills, 1 return: net_fills = 1, return_count = 1
       # income = net_fills * 5 - return_count * 1 = 1 * 5 - 1 * 1 = 4
       expect(prescription.income).to eq(4)
@@ -93,6 +104,7 @@ RSpec.describe Prescription do
       prescription.return_fill
       prescription.fill
       prescription.return_fill
+      prescription.reload
       # 2 fills, 2 returns: net_fills = 0, return_count = 2
       # income = net_fills * 5 - return_count * 1 = 0 * 5 - 2 * 1 = -2
       expect(prescription.income).to eq(-2)
@@ -100,33 +112,23 @@ RSpec.describe Prescription do
   end
 
   describe 'validations' do
-    it 'raises error when patient is nil' do
-      expect { Prescription.new(patient: nil, drug_name: 'A') }.to raise_error(ArgumentError, 'patient cannot be nil')
+    it 'validates presence of patient' do
+      prescription = Prescription.new(drug_name: 'A')
+      expect(prescription).not_to be_valid
+      expect(prescription.errors[:patient]).to include('must exist')
     end
 
-    it 'raises error when patient is not a Patient instance' do
-      expect do
-        Prescription.new(patient: 'not a patient',
-                         drug_name: 'A')
-      end.to raise_error(ArgumentError, 'patient must be an instance of Patient')
+    it 'validates presence of drug_name' do
+      prescription = Prescription.new(patient: patient, drug_name: nil)
+      expect(prescription).not_to be_valid
+      expect(prescription.errors[:drug_name]).to include("can't be blank")
     end
 
-    it 'raises error when drug_name is nil' do
-      expect do
-        Prescription.new(patient: patient, drug_name: nil)
-      end.to raise_error(ArgumentError, 'drug_name cannot be nil')
-    end
-
-    it 'raises error when drug_name is empty' do
-      expect do
-        Prescription.new(patient: patient, drug_name: '')
-      end.to raise_error(ArgumentError, 'drug_name cannot be empty')
-    end
-
-    it 'raises error when drug_name is only whitespace' do
-      expect do
-        Prescription.new(patient: patient, drug_name: '   ')
-      end.to raise_error(ArgumentError, 'drug_name cannot be empty')
+    it 'validates uniqueness of drug_name scoped to patient' do
+      create(:prescription, patient: patient, drug_name: 'A')
+      prescription = Prescription.new(patient: patient, drug_name: 'A')
+      expect(prescription).not_to be_valid
+      expect(prescription.errors[:drug_name]).to include('has already been taken')
     end
   end
 
@@ -141,3 +143,4 @@ RSpec.describe Prescription do
     end
   end
 end
+

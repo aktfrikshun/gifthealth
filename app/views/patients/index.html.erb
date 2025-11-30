@@ -1,0 +1,97 @@
+<div class="upload-card">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color: var(--pharmacy-secondary);">
+      <i class="fas fa-users me-2"></i>
+      Manage Patients
+    </h2>
+    <%= link_to prescriptions_path, class: 'btn btn-outline-secondary' do %>
+      <i class="fas fa-arrow-left me-2"></i>Back to Report
+    <% end %>
+  </div>
+
+  <% if @patients.empty? %>
+    <div class="alert alert-info text-center">
+      <i class="fas fa-info-circle fa-2x mb-3"></i>
+      <h4>No patients found</h4>
+      <p class="mb-0">Upload prescription files or add prescriptions manually to see patients here.</p>
+    </div>
+  <% else %>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead style="background: var(--pharmacy-light);">
+          <tr>
+            <th style="width: 30%;">
+              <i class="fas fa-user me-2"></i>Patient Name
+            </th>
+            <th style="width: 20%;" class="text-center">
+              <i class="fas fa-pills me-2"></i>Prescriptions
+            </th>
+            <th style="width: 15%;" class="text-center">Total Fills</th>
+            <th style="width: 15%;" class="text-end">Total Income</th>
+            <th style="width: 20%;" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @patients.each do |patient| %>
+            <tr>
+              <td class="patient-name"><%= patient.name %></td>
+              <td class="text-center">
+                <span class="badge bg-primary"><%= patient.prescriptions.count %></span>
+              </td>
+              <td class="text-center">
+                <span class="fills-badge"><%= patient.total_fills %></span>
+              </td>
+              <td class="text-end">
+                <span class="<%= patient.total_income >= 0 ? 'income-positive' : 'income-negative' %>">
+                  <%= patient.total_income >= 0 ? "$#{patient.total_income}" : "-$#{patient.total_income.abs}" %>
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm">
+                  <%= button_to clear_prescriptions_patient_path(patient), method: :delete, class: 'btn btn-warning btn-sm', title: 'Clear all prescriptions', data: { turbo_confirm: "Clear all prescriptions for #{patient.name}?" } do %>
+                    <i class="fas fa-eraser me-1"></i>Clear Rx
+                  <% end %>
+                  <%= button_to patient_path(patient), method: :delete, class: 'btn btn-danger btn-sm', title: 'Delete patient', data: { turbo_confirm: "Delete #{patient.name} and all prescriptions?" } do %>
+                    <i class="fas fa-trash me-1"></i>Delete
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 p-3" style="background: var(--pharmacy-light); border-radius: 8px;">
+      <div class="row text-center">
+        <div class="col-md-3">
+          <h4 class="text-primary"><%= @patients.count %></h4>
+          <p class="text-muted mb-0">Total Patients</p>
+        </div>
+        <div class="col-md-3">
+          <h4 class="text-info"><%= @patients.sum { |p| p.prescriptions.count } %></h4>
+          <p class="text-muted mb-0">Total Prescriptions</p>
+        </div>
+        <div class="col-md-3">
+          <h4 class="text-success"><%= @patients.sum(&:total_fills) %></h4>
+          <p class="text-muted mb-0">Total Fills</p>
+        </div>
+        <div class="col-md-3">
+          <h4 class="<%= @patients.sum(&:total_income) >= 0 ? 'text-success' : 'text-danger' %>">
+            $<%= @patients.sum(&:total_income).abs %>
+          </h4>
+          <p class="text-muted mb-0">Total Income</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="feature-box mt-4">
+  <h5><i class="fas fa-info-circle text-info me-2"></i>Patient Management</h5>
+  <ul class="mb-0">
+    <li><strong>Clear Prescriptions:</strong> Remove all prescriptions for a patient (keeps patient record)</li>
+    <li><strong>Delete Patient:</strong> Permanently delete patient and all their prescriptions</li>
+    <li>Patients with no prescriptions are automatically removed</li>
+  </ul>
+</div>

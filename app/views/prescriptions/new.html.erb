@@ -1,0 +1,89 @@
+<div class="upload-card">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color: var(--pharmacy-secondary);">
+      <i class="fas fa-plus-circle me-2"></i>
+      Add New Prescription
+    </h2>
+    <%= link_to prescriptions_path, class: 'btn btn-outline-secondary' do %>
+      <i class="fas fa-arrow-left me-2"></i>Back to Report
+    <% end %>
+  </div>
+
+  <%= form_with model: @prescription, local: true do |form| %>
+    <% if @prescription.errors.any? %>
+      <div class="alert alert-danger">
+        <h5>Errors prevented this prescription from being saved:</h5>
+        <ul class="mb-0">
+          <% @prescription.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="prescription_patient_name" class="form-label fw-bold">
+          <i class="fas fa-user me-2"></i>Patient Name
+        </label>
+        <%= text_field_tag 'prescription[patient_name]', nil, class: 'form-control', placeholder: 'Enter patient name', required: true, list: 'patients-datalist' %>
+        <datalist id="patients-datalist">
+          <% @patients.each do |patient| %>
+            <option value="<%= patient.name %>">
+          <% end %>
+        </datalist>
+        <small class="text-muted">Type to select existing or create new patient</small>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <%= form.label :drug_name, class: 'form-label fw-bold' do %>
+          <i class="fas fa-pills me-2"></i>Drug Name
+        <% end %>
+        <%= form.text_field :drug_name, class: 'form-control', placeholder: 'Enter drug name', required: true %>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <%= form.label :created, class: 'form-label fw-bold' do %>
+          <i class="fas fa-check-circle me-2"></i>Prescription Status
+        <% end %>
+        <div class="form-check form-switch" style="padding-top: 0.5rem;">
+          <%= form.check_box :created, class: 'form-check-input', checked: true, id: 'prescription_created' %>
+          <%= form.label :created, 'Created', class: 'form-check-label' %>
+        </div>
+        <small class="text-muted">Mark as created prescription</small>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <%= form.label :fill_count, class: 'form-label fw-bold' do %>
+          <i class="fas fa-plus-square me-2"></i>Fill Count
+        <% end %>
+        <%= form.number_field :fill_count, class: 'form-control', value: 0, min: 0 %>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <%= form.label :return_count, class: 'form-label fw-bold' do %>
+          <i class="fas fa-minus-square me-2"></i>Return Count
+        <% end %>
+        <%= form.number_field :return_count, class: 'form-control', value: 0, min: 0 %>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+      <%= link_to 'Cancel', prescriptions_path, class: 'btn btn-secondary' %>
+      <%= form.submit 'Create Prescription', class: 'btn btn-pharmacy' %>
+    </div>
+  <% end %>
+</div>
+
+<div class="feature-box mt-4">
+  <h5><i class="fas fa-info-circle text-info me-2"></i>Prescription Details</h5>
+  <ul class="mb-0">
+    <li><strong>Patient Name:</strong> Select existing patient or create new</li>
+    <li><strong>Drug Name:</strong> Name of the prescribed medication</li>
+    <li><strong>Created Status:</strong> Whether the prescription has been created</li>
+    <li><strong>Fill Count:</strong> Number of times prescription has been filled</li>
+    <li><strong>Return Count:</strong> Number of times prescription has been returned</li>
+  </ul>
+</div>

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../services/prescription_event_processor'
-
 # Command-line interface for the prescription event processor
 class CLI
   # Entry point for the CLI application

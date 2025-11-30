@@ -1,0 +1,152 @@
+<div class="upload-card" style="padding: 1.5rem;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0" style="color: var(--pharmacy-secondary);">
+      <i class="fas fa-file-upload me-2"></i>
+      Upload Prescription File
+    </h4>
+    <% if @report_generated %>
+      <%= link_to patients_path, class: 'btn btn-outline-primary btn-sm' do %>
+        <i class="fas fa-users me-1"></i>Manage Patients
+      <% end %>
+    <% end %>
+  </div>
+  
+  <%= form_with url: upload_prescriptions_path, method: :post, multipart: true, local: true, class: 'compact-upload-form' do |form| %>
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="upload-area-compact" onclick="document.getElementById('file-input').click()" style="cursor: pointer; padding: 1rem; border: 2px dashed var(--pharmacy-accent); border-radius: 8px; background: var(--pharmacy-light); text-align: center;">
+          <i class="fas fa-cloud-upload-alt" style="color: var(--pharmacy-primary); font-size: 1.5rem;"></i>
+          <span class="ms-2" style="color: var(--pharmacy-secondary);">Choose CSV, TXT, or Excel file</span>
+          <%= form.file_field :file, id: 'file-input', class: 'd-none', accept: '.csv,.txt,.xls,.xlsx', 
+              onchange: "document.getElementById('filename-display').textContent = this.files[0]?.name || ''" %>
+          <div id="filename-display" class="text-primary fw-bold mt-2"></div>
+        </div>
+      </div>
+      <div class="col-md-4 text-end">
+        <%= form.submit 'Process File', class: 'btn btn-pharmacy' %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @report_generated %>
+  <div class="report-card" id="prescription-report">
+    <div class="report-header d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-0">
+          <i class="fas fa-chart-bar me-2"></i>
+          Prescription Income Report
+        </h2>
+        <p class="mb-0 mt-2">Showing <%= @patients.count %> patients with active prescriptions</p>
+      </div>
+      <div>
+        <%= link_to patients_path, class: 'btn btn-outline-primary' do %>
+          <i class="fas fa-users me-2"></i>Manage Patients
+        <% end %>
+        <%= link_to new_prescription_path, class: 'btn btn-pharmacy ms-2' do %>
+          <i class="fas fa-plus me-2"></i>Add Prescription
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead style="background: var(--pharmacy-light);">
+          <tr>
+            <th style="width: 25%;">
+              <i class="fas fa-user me-2"></i>Patient Name
+            </th>
+            <th style="width: 25%;">
+              <i class="fas fa-pills me-2"></i>Drug Name
+            </th>
+            <th style="width: 12%;" class="text-center">Status</th>
+            <th style="width: 12%;" class="text-center">Net Fills</th>
+            <th style="width: 12%;" class="text-end">Income</th>
+            <th style="width: 14%;" class="text-center">
+              <%= button_to reset_all_patients_path, method: :delete, class: 'btn btn-outline-danger btn-sm mb-2', 
+                  data: { turbo_confirm: 'Are you sure you want to delete ALL patients and prescriptions? This cannot be undone!' },
+                  form: { onsubmit: 'return confirm("⚠️ WARNING: This will permanently delete ALL patients and prescriptions from the database. This action CANNOT be undone! Are you absolutely sure?");' } do %>
+                <i class="fas fa-trash-alt me-1"></i>Reset DB
+              <% end %>
+              <div>Actions</div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @patients.each do |patient| %>
+            <% patient.prescriptions.where(created: true).each do |prescription| %>
+              <tr class="patient-row">
+                <td class="patient-name"><%= patient.name %></td>
+                <td><%= prescription.drug_name %></td>
+                <td class="text-center">
+                  <span class="badge <%= prescription.created ? 'bg-success' : 'bg-secondary' %>">
+                    <%= prescription.created ? 'Created' : 'Not Created' %>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="fills-badge">
+                    <%= prescription.net_fills %> 
+                    <small class="text-muted">(F:<%= prescription.fill_count %> R:<%= prescription.return_count %>)</small>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <span class="<%= prescription.income >= 0 ? 'income-positive' : 'income-negative' %>">
+                    <%= prescription.income >= 0 ? "$#{prescription.income}" : "-$#{prescription.income.abs}" %>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <%= button_to increment_fill_prescription_path(prescription), method: :patch, class: 'btn btn-success btn-sm', title: 'Add Fill', data: { turbo: false } do %>
+                      <i class="fas fa-plus"></i>
+                    <% end %>
+                    <%= button_to decrement_fill_prescription_path(prescription), method: :patch, class: 'btn btn-warning btn-sm', title: 'Return', data: { turbo: false } do %>
+                      <i class="fas fa-minus"></i>
+                    <% end %>
+                    <%= link_to edit_prescription_path(prescription), class: 'btn btn-primary btn-sm', title: 'Edit' do %>
+                      <i class="fas fa-edit"></i>
+                    <% end %>
+                    <%= button_to prescription_path(prescription), method: :delete, class: 'btn btn-danger btn-sm', title: 'Delete', data: { turbo_confirm: 'Are you sure you want to delete this prescription?' } do %>
+                      <i class="fas fa-trash"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="mt-4 p-3" style="background: var(--pharmacy-light); border-radius: 8px;">
+      <div class="row text-center">
+        <div class="col-md-4">
+          <h4 class="text-primary"><%= @patients.count %></h4>
+          <p class="text-muted mb-0">Total Patients</p>
+        </div>
+        <div class="col-md-4">
+          <h4 class="text-success"><%= @patients.sum(&:total_fills) %></h4>
+          <p class="text-muted mb-0">Total Fills</p>
+        </div>
+        <div class="col-md-4">
+          <h4 class="<%= @patients.sum(&:total_income) >= 0 ? 'text-success' : 'text-danger' %>">
+            $<%= @patients.sum(&:total_income).abs %>
+          </h4>
+          <p class="text-muted mb-0">Total Income</p>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="text-center mt-4 mb-5">
+  <p class="text-muted">
+    <i class="fas fa-code me-2"></i>
+    <%= link_to 'REST API Documentation', document_path('API_DOCUMENTATION'), class: 'text-decoration-none' %>
+    <span class="mx-2">|</span>
+    <i class="fas fa-info-circle me-2"></i>
+    <%= link_to 'Implementation Details', document_path('RAILS_BRANCH_CHANGES'), class: 'text-decoration-none' %>
+    <span class="mx-2">|</span>
+    <i class="fas fa-sitemap me-2"></i>
+    <%= link_to 'Database ERD', document_path('erd'), class: 'text-decoration-none' %>
+  </p>
+</div>

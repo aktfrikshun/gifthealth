@@ -1,19 +1,7 @@
 # frozen_string_literal: true
 
-require_relative '../models/patient'
-require_relative '../models/prescription'
-
 # Processes prescription events and generates reports
 class PrescriptionEventProcessor
-  # Initializes a new PrescriptionEventProcessor instance
-  #
-  # This method sets up the processor with an empty hash to store patients.
-  # The hash is keyed by patient name for efficient lookup when processing events.
-  # This allows the processor to maintain state across multiple event processing calls.
-  def initialize
-    @patients = {}
-  end
-
   # Processes a single prescription event
   #
   # This method is the core event processing logic. It takes event details and
@@ -27,7 +15,7 @@ class PrescriptionEventProcessor
   # @param drug_name [String] The name of the drug
   # @param event_name [String] The type of event ('created', 'filled', or 'returned')
   def process_event(patient_name:, drug_name:, event_name:)
-    patient = get_or_create_patient(patient_name)
+    patient = Patient.find_or_create_by!(name: patient_name)
     prescription = patient.get_or_create_prescription(drug_name)
 
     # Route the event to the appropriate prescription method based on event type
@@ -89,26 +77,13 @@ class PrescriptionEventProcessor
   #
   # @return [Array<String>] An array of formatted report lines, one per patient
   def generate_report
-    @patients.values
-             .select(&:has_created_prescriptions?)
-             .sort_by { |patient| [-patient.total_fills, patient.total_income] }
-             .map { |patient| format_report_line(patient) }
+    Patient.all
+           .select(&:has_created_prescriptions?)
+           .sort_by { |patient| [-patient.total_fills, patient.total_income] }
+           .map { |patient| format_report_line(patient) }
   end
 
   private
-
-  # Gets an existing patient or creates a new one
-  #
-  # This method implements lazy initialization for patients. If a patient with the
-  # given name already exists in the hash, it returns that patient. Otherwise, it
-  # creates a new Patient instance and stores it in the hash. This ensures efficient
-  # lookup and prevents duplicate patient objects for the same name.
-  #
-  # @param name [String] The name of the patient to get or create
-  # @return [Patient] The existing or newly created patient
-  def get_or_create_patient(name)
-    @patients[name] ||= Patient.new(name)
-  end
 
   # Formats a single patient's data into a report line
   #
@@ -127,3 +102,4 @@ class PrescriptionEventProcessor
     "#{patient.name}: #{fills} fills #{income_str} income"
   end
 end
+

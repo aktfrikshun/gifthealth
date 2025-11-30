@@ -5,25 +5,23 @@ FactoryBot.define do
     association :patient, factory: :patient
     drug_name { Faker::Alphanumeric.alphanumeric(number: 1, min_alpha: 1).upcase }
 
-    initialize_with { new(patient: patient, drug_name: drug_name) }
-
     trait :created do
-      after(:build, &:mark_created)
+      created { true }
     end
 
     trait :filled do
-      created
-      after(:build, &:fill)
+      created { true }
+      fill_count { 1 }
     end
 
     trait :with_fills do
-      created
+      created { true }
       transient do
         fill_count { 1 }
       end
 
       after(:build) do |prescription, evaluator|
-        evaluator.fill_count.times { prescription.fill }
+        prescription.fill_count = evaluator.fill_count
       end
     end
 
@@ -34,8 +32,9 @@ FactoryBot.define do
       end
 
       after(:build) do |prescription, evaluator|
-        evaluator.return_count.times { prescription.return_fill }
+        prescription.return_count = evaluator.return_count
       end
     end
   end
 end
+

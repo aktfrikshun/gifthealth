@@ -1,0 +1,135 @@
+<div class="container-fluid my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 style="color: var(--pharmacy-secondary);">
+      <i class="fas fa-sitemap me-2"></i>
+      Database ERD
+    </h2>
+    <div>
+      <%= link_to prescriptions_path, class: 'btn btn-outline-secondary' do %>
+        <i class="fas fa-arrow-left me-2"></i>Back to App
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-light">
+      <div class="d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-search me-2"></i>Zoom Controls</span>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="zoomIn()">
+            <i class="fas fa-search-plus"></i> Zoom In
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="zoomOut()">
+            <i class="fas fa-search-minus"></i> Zoom Out
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="resetZoom()">
+            <i class="fas fa-compress"></i> Reset
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="fitToScreen()">
+            <i class="fas fa-expand"></i> Fit to Screen
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0" style="overflow: auto; height: calc(100vh - 200px); background: #f8f9fa;">
+      <div id="erd-container" style="display: flex; justify-content: center; align-items: center; min-height: 100%; padding: 20px; cursor: grab;">
+        <div id="erd-wrapper" style="transform-origin: center center; transition: transform 0.2s ease;">
+          <%= raw File.read(Rails.root.join('documents', 'erd-diagram.svg')) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #erd-container.grabbing {
+    cursor: grabbing;
+  }
+  
+  #erd-wrapper svg {
+    max-width: none;
+    height: auto;
+  }
+</style>
+
+<script>
+  let currentZoom = 1;
+  let isPanning = false;
+  let startX = 0;
+  let startY = 0;
+  let translateX = 0;
+  let translateY = 0;
+
+  const wrapper = document.getElementById('erd-wrapper');
+  const container = document.getElementById('erd-container');
+
+  function updateTransform() {
+    wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+  }
+
+  function zoomIn() {
+    currentZoom = Math.min(currentZoom * 1.2, 5);
+    updateTransform();
+  }
+
+  function zoomOut() {
+    currentZoom = Math.max(currentZoom / 1.2, 0.1);
+    updateTransform();
+  }
+
+  function resetZoom() {
+    currentZoom = 1;
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+  }
+
+  function fitToScreen() {
+    const svg = wrapper.querySelector('svg');
+    const containerRect = container.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+    
+    const scaleX = (containerRect.width - 40) / (svgRect.width / currentZoom);
+    const scaleY = (containerRect.height - 40) / (svgRect.height / currentZoom);
+    
+    currentZoom = Math.min(scaleX, scaleY);
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+  }
+
+  // Mouse wheel zoom
+  container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      zoomIn();
+    } else {
+      zoomOut();
+    }
+  });
+
+  // Pan functionality
+  container.addEventListener('mousedown', (e) => {
+    isPanning = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    container.classList.add('grabbing');
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isPanning) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+  });
+
+  document.addEventListener('mouseup', () => {
+    isPanning = false;
+    container.classList.remove('grabbing');
+  });
+
+  // Initialize with fit to screen
+  window.addEventListener('load', () => {
+    setTimeout(fitToScreen, 100);
+  });
+</script>

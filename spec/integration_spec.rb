@@ -3,8 +3,14 @@
 require 'spec_helper'
 require 'open3'
 
-RSpec.describe 'Integration tests' do
+RSpec.describe 'Integration tests', type: :integration do
   let(:executable) { File.join(__dir__, '..', 'bin', 'prescription_processor') }
+
+  # Ensure database is cleaned before each test since we're calling external process
+  before(:each) do
+    Patient.destroy_all
+    Prescription.destroy_all
+  end
 
   describe 'sample input from requirements' do
     let(:input) do
