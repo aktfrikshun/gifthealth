@@ -122,7 +122,7 @@ app/
 
 ## Database & Models
 
-### Entity Relationship Diagram
+### Proposed Entity Relationship Diagram
 
 ![Database ERD](erd-diagram.svg)
 
@@ -131,26 +131,7 @@ app/
 ### Schema
 
 **Patients:**
-```ruby
-create_table :patients do |t|
-  t.string :name, null: false, index: { unique: true }
-  t.timestamps
-end
-```
-
 **Prescriptions:**
-```ruby
-create_table :prescriptions do |t|
-  t.references :patient, null: false, foreign_key: true
-  t.string :drug_name, null: false
-  t.boolean :created, default: false, null: false
-  t.integer :fill_count, default: 0, null: false
-  t.integer :return_count, default: 0, null: false
-  t.timestamps
-  
-  t.index [:patient_id, :drug_name], unique: true  # One prescription per patient-drug
-end
-```
 
 **Key Design Decisions:**
 - Unique constraint prevents duplicate patient names
@@ -159,53 +140,10 @@ end
 - Foreign key maintains referential integrity
 - Timestamps enable audit trails
 
-### Models
-
-**Patient (ActiveRecord):**
-```ruby
-class Patient < ApplicationRecord
-  has_many :prescriptions, dependent: :destroy
-  validates :name, presence: true, uniqueness: true
-  
-  # Business logic methods
-  def total_fills
-    prescriptions.sum(&:net_fills)
-  end
-  
-  def total_income
-    prescriptions.sum(&:income)
-  end
-end
-```
-
-**Prescription (ActiveRecord):**
-```ruby
-class Prescription < ApplicationRecord
-  belongs_to :patient
-  validates :drug_name, presence: true, uniqueness: { scope: :patient_id }
-  
-  # Business rules preserved from original
-  def fill
-    return nil unless created?
-    increment!(:fill_count)
-    self
-  end
-  
-  def income
-    (net_fills * 5) - return_count
-  end
-  
-  def net_fills
-    fill_count - return_count
-  end
-end
-```
-
-**Business Logic Preservation:**
+**Business Logic:**
 - ✅ Prescriptions must be created before filling
 - ✅ Cannot return more than filled
 - ✅ Income = `(net_fills × $5) - (returns × $1)`
-- ✅ All original business rules maintained
 
 ---
 
@@ -215,7 +153,6 @@ end
 
 **Dashboard** (`/`)
 - Upload files (CSV, Excel, TXT)
-- Manual event entry
 - Real-time income report
 - Summary statistics
 - Pharmacy-themed design (teal color scheme)
@@ -316,13 +253,6 @@ Content-Type: application/json
 
 ### 4. Documentation Viewer
 
-**Markdown Rendering** (`/documents/:name`)
-- Renders all `.md` files with syntax highlighting
-- Table of contents with anchor links
-- Code blocks with proper indentation
-- Dark theme for code
-- Example: `/documents/REQUIREMENTS`
-
 **ERD Viewer** (`/documents/erd`)
 - Interactive SVG diagram
 - Zoom in/out controls
@@ -373,26 +303,10 @@ cat data.txt | ./bin/prescription_processor
 - No external API calls during test suite
 - Validates API response parsing and error handling
 
-### Database Cleaner Strategy
-
-```ruby
-# Fast transactions for unit tests
-config.before(:each) do |example|
-  strategy = example.metadata[:type] == :integration ? :truncation : :transaction
-  DatabaseCleaner.strategy = strategy
-end
-```
 
 ### Code Quality
 
 **RuboCop Configuration:**
-```yaml
-Metrics/AbcSize: {Max: 36}
-Metrics/MethodLength: {Max: 40}
-Metrics/ClassLength: {Max: 150}
-Metrics/CyclomaticComplexity: {Max: 10}
-```
-
 **Current Status:** 0 offenses ✅
 
 ---
@@ -402,17 +316,17 @@ Metrics/CyclomaticComplexity: {Max: 10}
 ### GitHub Actions Workflows
 
 #### 1. CI Workflow
-**Runs:** Every push/PR to `main` or `rails`
+**Runs:** Every push/PR to `main`
 
 **Jobs:**
-- Run full RSpec test suite (62 tests)
+- Run full RSpec test suite
 - Run RuboCop linter
 - PostgreSQL compatibility testing
 
 **Status:** ![CI](https://github.com/aktfrikshun/gifthealth/actions/workflows/ci.yml/badge.svg)
 
 #### 2. Security Workflow
-**Runs:** Every push/PR + **Weekly (Mon 8AM UTC)**
+**Runs:** Every push/PR
 
 **Scans:**
 - **bundler-audit**: CVE vulnerability detection
@@ -422,7 +336,7 @@ Metrics/CyclomaticComplexity: {Max: 10}
 **Status:** ![Security](https://github.com/aktfrikshun/gifthealth/actions/workflows/security.yml/badge.svg)
 
 #### 3. CodeQL Workflow
-**Runs:** Every push/PR + **Weekly (Wed 2AM UTC)**
+**Runs:** Every push/PR
 
 **Analysis:**
 - Ruby semantic code analysis
@@ -432,7 +346,7 @@ Metrics/CyclomaticComplexity: {Max: 10}
 **Status:** ![CodeQL](https://github.com/aktfrikshun/gifthealth/actions/workflows/codeql.yml/badge.svg)
 
 #### 4. HIPAA Compliance Workflow
-**Runs:** Every push/PR + **Daily (3AM UTC)**
+**Runs:** Every push/PR
 
 **Checks:**
 - **PHI Detection:**
@@ -566,67 +480,6 @@ bundle exec rails server
 - [ ] Data retention policies
 
 **See [HIPAA_COMPLIANCE.md](../HIPAA_COMPLIANCE.md) for complete guide**
-
-### Example: AWS Fargate Deployment
-
-**Dockerfile:**
-```dockerfile
-FROM ruby:3.3-slim
-
-RUN apt-get update -qq && apt-get install -y \
-  build-essential libpq-dev nodejs postgresql-client
-
-WORKDIR /app
-COPY Gemfile Gemfile.lock ./
-RUN bundle install
-
-COPY . .
-
-EXPOSE 3000
-CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
-```
-
-**Deploy to AWS Fargate:**
-```bash
-# Build and push to ECR
-aws ecr get-login-password --region us-east-1 | \
-  docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
-
-docker build -t gifthealth .
-docker tag gifthealth:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/gifthealth:latest
-docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/gifthealth:latest
-
-# Update ECS service
-aws ecs update-service --cluster gifthealth-cluster \
-  --service gifthealth-service --force-new-deployment
-
-# Run migrations
-aws ecs run-task --cluster gifthealth-cluster \
-  --task-definition gifthealth-migrate \
-  --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx],securityGroups=[sg-xxx]}"
-```
-
-**Infrastructure (Terraform example):**
-```hcl
-resource "aws_ecs_cluster" "main" {
-  name = "gifthealth-cluster"
-}
-
-resource "aws_ecs_service" "app" {
-  name            = "gifthealth-service"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = 2
-  launch_type     = "FARGATE"
-  
-  load_balancer {
-    target_group_arn = aws_lb_target_group.app.arn
-    container_name   = "gifthealth"
-    container_port   = 3000
-  }
-}
-```
 
 ### Performance Considerations
 
