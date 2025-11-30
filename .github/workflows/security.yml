@@ -1,0 +1,62 @@
+name: Security
+
+on:
+  push:
+    branches: [ main, rails ]
+  pull_request:
+    branches: [ main, rails ]
+  schedule:
+    # Run security checks every Monday at 8am UTC
+    - cron: '0 8 * * 1'
+
+jobs:
+  bundler-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Install bundler-audit
+      run: gem install bundler-audit
+
+    - name: Update vulnerability database
+      run: bundle audit --update
+
+    - name: Run bundler-audit
+      run: bundle audit --verbose
+
+  brakeman:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Install Brakeman
+      run: gem install brakeman
+
+    - name: Run Brakeman security scanner
+      run: brakeman --no-pager --format plain
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: moderate
