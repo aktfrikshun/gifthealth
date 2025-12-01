@@ -60,7 +60,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="erd-card">
     <div class="card-header bg-light">
       <div class="d-flex justify-content-between align-items-center">
         <span><i class="fas fa-search me-2"></i>Zoom Controls</span>
@@ -76,6 +76,9 @@
           </button>
           <button type="button" class="btn btn-sm btn-outline-primary" onclick="fitToScreen()">
             <i class="fas fa-expand"></i> Fit to Screen
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleFullscreen()">
+            <i class="fas fa-expand-arrows-alt"></i> <span id="fullscreen-text">Fullscreen</span>
           </button>
         </div>
       </div>
@@ -99,6 +102,23 @@
     max-width: none;
     height: auto;
   }
+  
+  /* Fullscreen styles */
+  #erd-card.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    margin: 0;
+    border-radius: 0;
+    height: 100vh !important;
+  }
+  
+  #erd-card.fullscreen .card-body {
+    height: calc(100vh - 60px) !important;
+  }
 </style>
 
 <script>
@@ -117,7 +137,7 @@
   }
 
   function zoomIn() {
-    currentZoom = Math.min(currentZoom * 1.2, 5);
+    currentZoom = Math.min(currentZoom * 1.2, 10);
     updateTransform();
   }
 
@@ -146,6 +166,33 @@
     translateY = 0;
     updateTransform();
   }
+  
+  function toggleFullscreen() {
+    const card = document.getElementById('erd-card');
+    const text = document.getElementById('fullscreen-text');
+    
+    if (card.classList.contains('fullscreen')) {
+      card.classList.remove('fullscreen');
+      text.textContent = 'Fullscreen';
+      document.body.style.overflow = '';
+    } else {
+      card.classList.add('fullscreen');
+      text.textContent = 'Exit Fullscreen';
+      document.body.style.overflow = 'hidden';
+      // Adjust zoom after entering fullscreen
+      setTimeout(fitToScreen, 100);
+    }
+  }
+  
+  // ESC key to exit fullscreen
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const card = document.getElementById('erd-card');
+      if (card.classList.contains('fullscreen')) {
+        toggleFullscreen();
+      }
+    }
+  });
 
   // Mouse wheel zoom
   container.addEventListener('wheel', (e) => {
