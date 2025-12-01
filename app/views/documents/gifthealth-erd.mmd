@@ -1,0 +1,444 @@
+erDiagram
+    PATIENT ||--o{ PRESCRIPTION : "has"
+    PATIENT ||--o{ INSURANCE_COVERAGE : "has"
+    PATIENT ||--o{ PATIENT_ADDRESS : "has"
+    PATIENT ||--o{ PATIENT_ALLERGY : "has"
+    PATIENT ||--o{ PAYMENT_METHOD : "has"
+    PATIENT ||--o{ ORDER : "places"
+    
+    PRESCRIBER ||--o{ PRESCRIPTION : "writes"
+    PRESCRIBER ||--o{ PRESCRIBER_LICENSE : "holds"
+    PRESCRIBER }o--|| MEDICAL_FACILITY : "works-at"
+    
+    PRESCRIPTION ||--o{ PRESCRIPTION_ITEM : "contains"
+    PRESCRIPTION ||--o{ PRESCRIPTION_REFILL : "has"
+    PRESCRIPTION ||--o{ PRESCRIPTION_AUDIT : "tracks"
+    
+    MEDICATION ||--o{ PRESCRIPTION_ITEM : "prescribed-in"
+    MEDICATION }o--|| MEDICATION_CATEGORY : "belongs-to"
+    MEDICATION ||--o{ MEDICATION_INTERACTION : "has"
+    MEDICATION ||--o{ MEDICATION_INVENTORY : "tracked-in"
+    MEDICATION }o--|| MANUFACTURER : "made-by"
+    
+    PRESCRIPTION_ITEM ||--o{ FULFILLMENT : "fulfilled-by"
+    
+    FULFILLMENT }o--|| ORDER : "part-of"
+    FULFILLMENT }o--|| PHARMACY : "processed-at"
+    FULFILLMENT }o--|| PHARMACIST : "verified-by"
+    FULFILLMENT }o--|| PHARMACY_TECHNICIAN : "prepared-by"
+    FULFILLMENT ||--o{ FULFILLMENT_AUDIT : "tracks"
+    
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    ORDER ||--|| PAYMENT : "has"
+    ORDER ||--|| SHIPMENT : "has"
+    ORDER }o--|| INSURANCE_CLAIM : "may-have"
+    
+    INSURANCE_COVERAGE }o--|| INSURANCE_PROVIDER : "provided-by"
+    INSURANCE_CLAIM }o--|| INSURANCE_PROVIDER : "submitted-to"
+    
+    SHIPMENT ||--o{ SHIPMENT_TRACKING : "tracked-by"
+    SHIPMENT }o--|| SHIPPING_CARRIER : "handled-by"
+    SHIPMENT }o--|| PATIENT_ADDRESS : "delivered-to"
+    
+    PHARMACY ||--o{ PHARMACY_LICENSE : "holds"
+    PHARMACY ||--o{ MEDICATION_INVENTORY : "maintains"
+    PHARMACY ||--o{ PHARMACIST : "employs"
+    PHARMACY ||--o{ PHARMACY_TECHNICIAN : "employs"
+    
+    PATIENT {
+        uuid patient_id PK
+        string first_name
+        string last_name
+        date date_of_birth
+        string gender
+        string email
+        string phone_primary
+        string phone_secondary
+        string ssn_encrypted
+        datetime created_at
+        datetime updated_at
+        boolean is_active
+    }
+    
+    PATIENT_ADDRESS {
+        uuid address_id PK
+        uuid patient_id FK
+        string address_type
+        string street_line1
+        string street_line2
+        string city
+        string state
+        string zip_code
+        string country
+        boolean is_default
+        boolean is_verified
+        datetime created_at
+    }
+    
+    PATIENT_ALLERGY {
+        uuid allergy_id PK
+        uuid patient_id FK
+        string allergen_type
+        string allergen_name
+        string severity
+        string reaction
+        date onset_date
+        datetime created_at
+    }
+    
+    PRESCRIBER {
+        uuid prescriber_id PK
+        string first_name
+        string last_name
+        string npi_number
+        string dea_number
+        string specialty
+        string email
+        string phone
+        uuid facility_id FK
+        datetime created_at
+        boolean is_active
+    }
+    
+    PRESCRIBER_LICENSE {
+        uuid license_id PK
+        uuid prescriber_id FK
+        string state
+        string license_number
+        date issue_date
+        date expiration_date
+        string status
+        datetime created_at
+    }
+    
+    MEDICAL_FACILITY {
+        uuid facility_id PK
+        string facility_name
+        string facility_type
+        string npi_number
+        string phone
+        string email
+        string street_address
+        string city
+        string state
+        string zip_code
+        datetime created_at
+    }
+    
+    PRESCRIPTION {
+        uuid prescription_id PK
+        uuid patient_id FK
+        uuid prescriber_id FK
+        string prescription_number
+        date written_date
+        date expiration_date
+        int refills_authorized
+        int refills_remaining
+        string status
+        string priority
+        text notes
+        boolean is_controlled_substance
+        datetime created_at
+        datetime updated_at
+    }
+    
+    PRESCRIPTION_ITEM {
+        uuid prescription_item_id PK
+        uuid prescription_id FK
+        uuid medication_id FK
+        string dosage
+        string quantity
+        string unit
+        string frequency
+        string route
+        int duration_days
+        text instructions
+        boolean substitution_allowed
+        datetime created_at
+    }
+    
+    PRESCRIPTION_REFILL {
+        uuid refill_id PK
+        uuid prescription_id FK
+        int refill_number
+        date refill_date
+        date requested_date
+        string status
+        uuid approved_by FK
+        datetime approved_at
+        text notes
+    }
+    
+    PRESCRIPTION_AUDIT {
+        uuid audit_id PK
+        uuid prescription_id FK
+        uuid user_id FK
+        string action_type
+        text old_values
+        text new_values
+        string ip_address
+        datetime created_at
+    }
+    
+    MEDICATION {
+        uuid medication_id PK
+        string ndc_code
+        string medication_name
+        string generic_name
+        string brand_name
+        string strength
+        string dosage_form
+        uuid category_id FK
+        uuid manufacturer_id FK
+        boolean is_controlled
+        string dea_schedule
+        boolean requires_refrigeration
+        decimal unit_price
+        datetime created_at
+        boolean is_active
+    }
+    
+    MEDICATION_CATEGORY {
+        uuid category_id PK
+        string category_name
+        string description
+        datetime created_at
+    }
+    
+    MEDICATION_INTERACTION {
+        uuid interaction_id PK
+        uuid medication_id_1 FK
+        uuid medication_id_2 FK
+        string severity
+        text description
+        text clinical_effects
+        datetime created_at
+    }
+    
+    MANUFACTURER {
+        uuid manufacturer_id PK
+        string manufacturer_name
+        string contact_email
+        string contact_phone
+        string address
+        datetime created_at
+    }
+    
+    MEDICATION_INVENTORY {
+        uuid inventory_id PK
+        uuid pharmacy_id FK
+        uuid medication_id FK
+        int quantity_on_hand
+        int reorder_level
+        int reorder_quantity
+        string lot_number
+        date expiration_date
+        decimal cost_per_unit
+        datetime last_updated
+    }
+    
+    FULFILLMENT {
+        uuid fulfillment_id PK
+        uuid prescription_item_id FK
+        uuid order_id FK
+        uuid pharmacy_id FK
+        uuid prepared_by FK
+        uuid verified_by FK
+        datetime prepared_at
+        datetime verified_at
+        string status
+        int quantity_dispensed
+        string lot_number
+        date expiration_date
+        text pharmacist_notes
+        datetime created_at
+    }
+    
+    FULFILLMENT_AUDIT {
+        uuid audit_id PK
+        uuid fulfillment_id FK
+        uuid user_id FK
+        string action_type
+        text details
+        datetime created_at
+    }
+    
+    ORDER {
+        uuid order_id PK
+        uuid patient_id FK
+        string order_number
+        datetime order_date
+        string status
+        decimal subtotal
+        decimal tax_amount
+        decimal shipping_cost
+        decimal insurance_coverage
+        decimal patient_responsibility
+        decimal total_amount
+        text special_instructions
+        datetime created_at
+        datetime updated_at
+    }
+    
+    ORDER_ITEM {
+        uuid order_item_id PK
+        uuid order_id FK
+        uuid fulfillment_id FK
+        int quantity
+        decimal unit_price
+        decimal line_total
+        datetime created_at
+    }
+    
+    PAYMENT {
+        uuid payment_id PK
+        uuid order_id FK
+        uuid payment_method_id FK
+        decimal amount
+        string payment_status
+        string transaction_id
+        datetime payment_date
+        string payment_gateway
+        text notes
+        datetime created_at
+    }
+    
+    PAYMENT_METHOD {
+        uuid payment_method_id PK
+        uuid patient_id FK
+        string payment_type
+        string card_last_four
+        string card_type
+        date expiration_date
+        string billing_zip
+        boolean is_default
+        datetime created_at
+    }
+    
+    INSURANCE_COVERAGE {
+        uuid coverage_id PK
+        uuid patient_id FK
+        uuid insurance_provider_id FK
+        string policy_number
+        string group_number
+        string plan_type
+        date effective_date
+        date termination_date
+        string relationship_to_insured
+        int priority_order
+        boolean is_active
+        datetime created_at
+    }
+    
+    INSURANCE_PROVIDER {
+        uuid provider_id PK
+        string provider_name
+        string bin_number
+        string pcn_number
+        string contact_phone
+        string contact_email
+        datetime created_at
+    }
+    
+    INSURANCE_CLAIM {
+        uuid claim_id PK
+        uuid order_id FK
+        uuid insurance_coverage_id FK
+        uuid insurance_provider_id FK
+        string claim_number
+        datetime submission_date
+        string status
+        decimal submitted_amount
+        decimal approved_amount
+        decimal patient_copay
+        text rejection_reason
+        datetime processed_date
+        datetime created_at
+    }
+    
+    SHIPMENT {
+        uuid shipment_id PK
+        uuid order_id FK
+        uuid shipping_carrier_id FK
+        uuid delivery_address_id FK
+        string tracking_number
+        string shipping_method
+        decimal shipping_cost
+        datetime estimated_delivery
+        datetime actual_delivery
+        string status
+        text delivery_instructions
+        boolean signature_required
+        datetime created_at
+    }
+    
+    SHIPMENT_TRACKING {
+        uuid tracking_id PK
+        uuid shipment_id FK
+        string status
+        string location
+        text description
+        datetime timestamp
+        datetime created_at
+    }
+    
+    SHIPPING_CARRIER {
+        uuid carrier_id PK
+        string carrier_name
+        string contact_phone
+        string api_endpoint
+        string api_key_encrypted
+        boolean is_active
+        datetime created_at
+    }
+    
+    PHARMACY {
+        uuid pharmacy_id PK
+        string pharmacy_name
+        string ncpdp_number
+        string npi_number
+        string phone
+        string email
+        string street_address
+        string city
+        string state
+        string zip_code
+        string timezone
+        boolean is_active
+        datetime created_at
+    }
+    
+    PHARMACY_LICENSE {
+        uuid license_id PK
+        uuid pharmacy_id FK
+        string state
+        string license_number
+        date issue_date
+        date expiration_date
+        string status
+        datetime created_at
+    }
+    
+    PHARMACIST {
+        uuid pharmacist_id PK
+        uuid pharmacy_id FK
+        string first_name
+        string last_name
+        string license_number
+        string email
+        string phone
+        boolean is_active
+        datetime created_at
+    }
+    
+    PHARMACY_TECHNICIAN {
+        uuid technician_id PK
+        uuid pharmacy_id FK
+        string first_name
+        string last_name
+        string certification_number
+        string email
+        string phone
+        boolean is_active
+        datetime created_at
+    }
