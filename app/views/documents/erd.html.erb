@@ -83,7 +83,7 @@
     <div class="card-body p-0" style="overflow: auto; height: calc(100vh - 400px); background: #f8f9fa;">
       <div id="erd-container" style="display: flex; justify-content: center; align-items: center; min-height: 100%; padding: 20px; cursor: grab;">
         <div id="erd-wrapper" style="transform-origin: center center; transition: transform 0.2s ease;">
-          <%= raw File.read(Rails.root.join('documents', 'erd-diagram.svg')) %>
+          <%= raw File.read(Rails.root.join('app', 'views', 'documents', 'gifthealth-erd.svg')) %>
         </div>
       </div>
     </div>
