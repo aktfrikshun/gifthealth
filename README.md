@@ -290,8 +290,8 @@ John E returned
 The output is:
 
 ```
-John: 0 fills -$1 income
 Mark: 2 fills $9 income
+John: 0 fills -$1 income
 Nick: 0 fills $0 income
 ```
 
