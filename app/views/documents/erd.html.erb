@@ -2,12 +2,61 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 style="color: var(--pharmacy-secondary);">
       <i class="fas fa-sitemap me-2"></i>
-      Database ERD
+      Database Entity Relationship Diagram
     </h2>
     <div>
       <%= link_to prescriptions_path, class: 'btn btn-outline-secondary' do %>
         <i class="fas fa-arrow-left me-2"></i>Back to App
       <% end %>
+    </div>
+  </div>
+
+  <!-- Key Features Section -->
+  <div class="card mb-3">
+    <div class="card-header" style="background: linear-gradient(90deg, var(--pharmacy-secondary) 0%, var(--pharmacy-primary) 100%); color: white;">
+      <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Key Features of the Database Design</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="text-primary"><i class="fas fa-database me-2"></i>Core Entities</h6>
+          <ul class="small">
+            <li><strong>Patient Management</strong> - Patient demographics, addresses, allergies, payment methods</li>
+            <li><strong>Prescriber Management</strong> - Doctors, licenses, medical facilities</li>
+            <li><strong>Prescription Management</strong> - Prescriptions, items, refills, audit trails</li>
+            <li><strong>Medication Management</strong> - Medications, categories, interactions, inventory</li>
+            <li><strong>Fulfillment Process</strong> - Order processing, pharmacy staff, verification</li>
+            <li><strong>Insurance Processing</strong> - Coverage, providers, claims</li>
+            <li><strong>Payment Processing</strong> - Payment methods, transactions</li>
+            <li><strong>Shipping & Delivery</strong> - Shipments, tracking, carriers</li>
+            <li><strong>Pharmacy Operations</strong> - Pharmacies, licenses, staff, inventory</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h6 class="text-success"><i class="fas fa-link me-2"></i>Key Relationships</h6>
+          <ul class="small">
+            <li>Patients can have multiple prescriptions and insurance coverages</li>
+            <li>Prescriptions contain multiple items (medications)</li>
+            <li>Each fulfillment is verified by a pharmacist and prepared by a technician</li>
+            <li>Orders aggregate multiple fulfillments</li>
+            <li>Insurance claims are processed for eligible orders</li>
+            <li>Comprehensive audit trails for compliance</li>
+          </ul>
+          
+          <h6 class="text-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Compliance & Security Features</h6>
+          <ul class="small">
+            <li>Encrypted sensitive data (SSN, payment info)</li>
+            <li>Audit trails for prescriptions and fulfillments</li>
+            <li>License tracking for prescribers, pharmacists, and pharmacies</li>
+            <li>Controlled substance tracking</li>
+            <li>DEA schedule classification</li>
+          </ul>
+        </div>
+      </div>
+      <div class="alert alert-info mt-3 mb-0">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Complete Lifecycle Support:</strong> This design supports the complete prescription fulfillment lifecycle from prescription creation through delivery and payment processing.
+      </div>
     </div>
   </div>
 
@@ -31,7 +80,7 @@
         </div>
       </div>
     </div>
-    <div class="card-body p-0" style="overflow: auto; height: calc(100vh - 200px); background: #f8f9fa;">
+    <div class="card-body p-0" style="overflow: auto; height: calc(100vh - 400px); background: #f8f9fa;">
       <div id="erd-container" style="display: flex; justify-content: center; align-items: center; min-height: 100%; padding: 20px; cursor: grab;">
         <div id="erd-wrapper" style="transform-origin: center center; transition: transform 0.2s ease;">
           <%= raw File.read(Rails.root.join('documents', 'erd-diagram.svg')) %>
