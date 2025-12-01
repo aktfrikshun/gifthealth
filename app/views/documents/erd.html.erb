@@ -14,48 +14,431 @@
   <!-- Key Features Section -->
   <div class="card mb-3">
     <div class="card-header" style="background: linear-gradient(90deg, var(--pharmacy-secondary) 0%, var(--pharmacy-primary) 100%); color: white;">
-      <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Key Features of the Database Design</h5>
+      <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Summary of Models and Their Relationships</h5>
     </div>
     <div class="card-body">
-      <div class="row">
-        <div class="col-md-6">
-          <h6 class="text-primary"><i class="fas fa-database me-2"></i>Core Entities</h6>
-          <ul class="small">
-            <li><strong>Patient Management</strong> - Patient demographics, addresses, allergies, payment methods</li>
-            <li><strong>Prescriber Management</strong> - Doctors, licenses, medical facilities</li>
-            <li><strong>Prescription Management</strong> - Prescriptions, items, refills, audit trails</li>
-            <li><strong>Medication Management</strong> - Medications, categories, interactions, inventory</li>
-            <li><strong>Fulfillment Process</strong> - Order processing, pharmacy staff, verification</li>
-            <li><strong>Insurance Processing</strong> - Coverage, providers, claims</li>
-            <li><strong>Payment Processing</strong> - Payment methods, transactions</li>
-            <li><strong>Shipping & Delivery</strong> - Shipments, tracking, carriers</li>
-            <li><strong>Pharmacy Operations</strong> - Pharmacies, licenses, staff, inventory</li>
-          </ul>
+      <p class="lead">This ERD models a comprehensive prescription fulfillment service centering around patient care, prescription processing, inventory management, and delivery.</p>
+      
+      <div class="accordion" id="erdAccordion">
+        <!-- 1. Patient-Related Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingPatient">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePatient" aria-expanded="true" aria-controls="collapsePatient">
+              <i class="fas fa-user-injured me-2"></i><strong>1. Patient-Related Models</strong>
+            </button>
+          </h2>
+          <div id="collapsePatient" class="accordion-collapse collapse show" aria-labelledby="headingPatient" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">PATIENT</dt>
+                <dd class="col-sm-9">
+                  Represents an individual receiving prescriptions.
+                  <ul class="small mt-1">
+                    <li>has many PRESCRIPTIONs</li>
+                    <li>has many INSURANCE_COVERAGE records</li>
+                    <li>has many PATIENT_ADDRESSes</li>
+                    <li>has many PATIENT_ALLERGY records</li>
+                    <li>has many PAYMENT_METHODs</li>
+                    <li>places many ORDERs</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PATIENT_ADDRESS</dt>
+                <dd class="col-sm-9">
+                  Stores various addresses for a patient (e.g., home, shipping).
+                  <ul class="small mt-1">
+                    <li>belongs to one PATIENT</li>
+                    <li>is delivered to by one SHIPMENT</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PATIENT_ALLERGY</dt>
+                <dd class="col-sm-9">
+                  Records a patient's known allergies.
+                  <ul class="small mt-1">
+                    <li>belongs to one PATIENT</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PAYMENT_METHOD</dt>
+                <dd class="col-sm-9">
+                  Stores patient payment details (e.g., credit cards).
+                  <ul class="small mt-1">
+                    <li>belongs to one PATIENT</li>
+                    <li>has one (optional) PAYMENT</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <h6 class="text-success"><i class="fas fa-link me-2"></i>Key Relationships</h6>
-          <ul class="small">
-            <li>Patients can have multiple prescriptions and insurance coverages</li>
-            <li>Prescriptions contain multiple items (medications)</li>
-            <li>Each fulfillment is verified by a pharmacist and prepared by a technician</li>
-            <li>Orders aggregate multiple fulfillments</li>
-            <li>Insurance claims are processed for eligible orders</li>
-            <li>Comprehensive audit trails for compliance</li>
-          </ul>
-          
-          <h6 class="text-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Compliance & Security Features</h6>
-          <ul class="small">
-            <li>Encrypted sensitive data (SSN, payment info)</li>
-            <li>Audit trails for prescriptions and fulfillments</li>
-            <li>License tracking for prescribers, pharmacists, and pharmacies</li>
-            <li>Controlled substance tracking</li>
-            <li>DEA schedule classification</li>
-          </ul>
+
+        <!-- 2. Prescriber & Medical Facility Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingPrescriber">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrescriber" aria-expanded="false" aria-controls="collapsePrescriber">
+              <i class="fas fa-user-md me-2"></i><strong>2. Prescriber & Medical Facility Models</strong>
+            </button>
+          </h2>
+          <div id="collapsePrescriber" class="accordion-collapse collapse" aria-labelledby="headingPrescriber" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">PRESCRIBER</dt>
+                <dd class="col-sm-9">
+                  Represents a healthcare professional authorized to write prescriptions.
+                  <ul class="small mt-1">
+                    <li>writes many PRESCRIPTIONs</li>
+                    <li>holds many PRESCRIBER_LICENSEs</li>
+                    <li>works at one MEDICAL_FACILITY</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PRESCRIBER_LICENSE</dt>
+                <dd class="col-sm-9">
+                  Details the licenses held by a prescriber in different states.
+                  <ul class="small mt-1">
+                    <li>is held by one PRESCRIBER</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">MEDICAL_FACILITY</dt>
+                <dd class="col-sm-9">
+                  Represents a clinic, hospital, or other facility where prescribers work.
+                  <ul class="small mt-1">
+                    <li>employs many PRESCRIBERs</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="alert alert-info mt-3 mb-0">
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>Complete Lifecycle Support:</strong> This design supports the complete prescription fulfillment lifecycle from prescription creation through delivery and payment processing.
+
+        <!-- 3. Prescription-Related Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingPrescription">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrescription" aria-expanded="false" aria-controls="collapsePrescription">
+              <i class="fas fa-prescription me-2"></i><strong>3. Prescription-Related Models</strong>
+            </button>
+          </h2>
+          <div id="collapsePrescription" class="accordion-collapse collapse" aria-labelledby="headingPrescription" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">PRESCRIPTION</dt>
+                <dd class="col-sm-9">
+                  The core record of a prescription issued by a prescriber for a patient.
+                  <ul class="small mt-1">
+                    <li>belongs to one PATIENT</li>
+                    <li>is written by one PRESCRIBER</li>
+                    <li>contains many PRESCRIPTION_ITEMs</li>
+                    <li>has many PRESCRIPTION_REFILL records</li>
+                    <li>tracks many PRESCRIPTION_AUDIT entries</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PRESCRIPTION_ITEM</dt>
+                <dd class="col-sm-9">
+                  Details a specific medication within a prescription (dosage, quantity, etc.).
+                  <ul class="small mt-1">
+                    <li>belongs to one PRESCRIPTION</li>
+                    <li>prescribes one MEDICATION</li>
+                    <li>is fulfilled by one FULFILLMENT</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PRESCRIPTION_REFILL</dt>
+                <dd class="col-sm-9">
+                  Tracks individual refill requests and their status for a prescription.
+                  <ul class="small mt-1">
+                    <li>belongs to one PRESCRIPTION</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PRESCRIPTION_AUDIT</dt>
+                <dd class="col-sm-9">
+                  Logs changes and actions related to a prescription for compliance.
+                  <ul class="small mt-1">
+                    <li>audits one PRESCRIPTION</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Medication & Inventory Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingMedication">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMedication" aria-expanded="false" aria-controls="collapseMedication">
+              <i class="fas fa-pills me-2"></i><strong>4. Medication & Inventory Models</strong>
+            </button>
+          </h2>
+          <div id="collapseMedication" class="accordion-collapse collapse" aria-labelledby="headingMedication" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">MEDICATION</dt>
+                <dd class="col-sm-9">
+                  Represents a specific drug product.
+                  <ul class="small mt-1">
+                    <li>is prescribed in many PRESCRIPTION_ITEMs</li>
+                    <li>belongs to one MEDICATION_CATEGORY</li>
+                    <li>has many MEDICATION_INTERACTIONs (bidirectional)</li>
+                    <li>is tracked in many MEDICATION_INVENTORY records</li>
+                    <li>is made by one MANUFACTURER</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">MEDICATION_CATEGORY</dt>
+                <dd class="col-sm-9">
+                  Groups medications by therapeutic class or type.
+                  <ul class="small mt-1">
+                    <li>categorizes many MEDICATIONs</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">MEDICATION_INTERACTION</dt>
+                <dd class="col-sm-9">
+                  Records known interactions between two medications.
+                  <ul class="small mt-1">
+                    <li>involves two MEDICATIONs</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">MANUFACTURER</dt>
+                <dd class="col-sm-9">
+                  Represents the company that produces a medication.
+                  <ul class="small mt-1">
+                    <li>manufactures many MEDICATIONs</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">MEDICATION_INVENTORY</dt>
+                <dd class="col-sm-9">
+                  Tracks stock levels and details (lot number, expiry) of medications at a specific pharmacy.
+                  <ul class="small mt-1">
+                    <li>is maintained by one PHARMACY</li>
+                    <li>tracks one MEDICATION</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Fulfillment Process Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingFulfillment">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFulfillment" aria-expanded="false" aria-controls="collapseFulfillment">
+              <i class="fas fa-tasks me-2"></i><strong>5. Fulfillment Process Models</strong>
+            </button>
+          </h2>
+          <div id="collapseFulfillment" class="accordion-collapse collapse" aria-labelledby="headingFulfillment" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">FULFILLMENT</dt>
+                <dd class="col-sm-9">
+                  Represents the physical preparation and verification of a prescribed item for an order.
+                  <ul class="small mt-1">
+                    <li>fulfills one PRESCRIPTION_ITEM</li>
+                    <li>is part of one ORDER</li>
+                    <li>is processed at one PHARMACY</li>
+                    <li>is verified by one PHARMACIST</li>
+                    <li>is prepared by one PHARMACY_TECHNICIAN</li>
+                    <li>tracks many FULFILLMENT_AUDIT entries</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">FULFILLMENT_AUDIT</dt>
+                <dd class="col-sm-9">
+                  Logs actions and changes during the fulfillment process.
+                  <ul class="small mt-1">
+                    <li>audits one FULFILLMENT</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Order & Payment Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingOrder">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrder" aria-expanded="false" aria-controls="collapseOrder">
+              <i class="fas fa-shopping-cart me-2"></i><strong>6. Order & Payment Models</strong>
+            </button>
+          </h2>
+          <div id="collapseOrder" class="accordion-collapse collapse" aria-labelledby="headingOrder" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">ORDER</dt>
+                <dd class="col-sm-9">
+                  The patient's request for one or more fulfilled prescription items.
+                  <ul class="small mt-1">
+                    <li>is placed by one PATIENT</li>
+                    <li>contains many ORDER_ITEMs</li>
+                    <li>has one PAYMENT</li>
+                    <li>has one SHIPMENT</li>
+                    <li>may have one INSURANCE_CLAIM</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">ORDER_ITEM</dt>
+                <dd class="col-sm-9">
+                  Links an order to a specific fulfillment, representing the dispensed quantity of a medication.
+                  <ul class="small mt-1">
+                    <li>belongs to one ORDER</li>
+                    <li>references one FULFILLMENT</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PAYMENT</dt>
+                <dd class="col-sm-9">
+                  Records a financial transaction for an order.
+                  <ul class="small mt-1">
+                    <li>is for one ORDER</li>
+                    <li>uses one PAYMENT_METHOD</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Insurance Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingInsurance">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsurance" aria-expanded="false" aria-controls="collapseInsurance">
+              <i class="fas fa-shield-alt me-2"></i><strong>7. Insurance Models</strong>
+            </button>
+          </h2>
+          <div id="collapseInsurance" class="accordion-collapse collapse" aria-labelledby="headingInsurance" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">INSURANCE_COVERAGE</dt>
+                <dd class="col-sm-9">
+                  Details a patient's insurance policy.
+                  <ul class="small mt-1">
+                    <li>belongs to one PATIENT</li>
+                    <li>is provided by one INSURANCE_PROVIDER</li>
+                    <li>is referenced by one INSURANCE_CLAIM</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">INSURANCE_PROVIDER</dt>
+                <dd class="col-sm-9">
+                  Represents an insurance company.
+                  <ul class="small mt-1">
+                    <li>provides many INSURANCE_COVERAGE records</li>
+                    <li>receives many INSURANCE_CLAIMs</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">INSURANCE_CLAIM</dt>
+                <dd class="col-sm-9">
+                  Records the submission and processing of an insurance claim for an order.
+                  <ul class="small mt-1">
+                    <li>is associated with one ORDER</li>
+                    <li>uses one INSURANCE_COVERAGE</li>
+                    <li>is submitted to one INSURANCE_PROVIDER</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Shipping & Carrier Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingShipping">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseShipping" aria-expanded="false" aria-controls="collapseShipping">
+              <i class="fas fa-truck me-2"></i><strong>8. Shipping & Carrier Models</strong>
+            </button>
+          </h2>
+          <div id="collapseShipping" class="accordion-collapse collapse" aria-labelledby="headingShipping" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">SHIPMENT</dt>
+                <dd class="col-sm-9">
+                  Represents the physical delivery of an order.
+                  <ul class="small mt-1">
+                    <li>is for one ORDER</li>
+                    <li>is handled by one SHIPPING_CARRIER</li>
+                    <li>is delivered to one PATIENT_ADDRESS</li>
+                    <li>is tracked by many SHIPMENT_TRACKING entries</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">SHIPMENT_TRACKING</dt>
+                <dd class="col-sm-9">
+                  Records individual tracking events for a shipment.
+                  <ul class="small mt-1">
+                    <li>tracks one SHIPMENT</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">SHIPPING_CARRIER</dt>
+                <dd class="col-sm-9">
+                  Represents external companies responsible for delivering shipments.
+                  <ul class="small mt-1">
+                    <li>handles many SHIPMENTs</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. Pharmacy Operation Models -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingPharmacy">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePharmacy" aria-expanded="false" aria-controls="collapsePharmacy">
+              <i class="fas fa-hospital me-2"></i><strong>9. Pharmacy Operation Models (In-house Pharmacy)</strong>
+            </button>
+          </h2>
+          <div id="collapsePharmacy" class="accordion-collapse collapse" aria-labelledby="headingPharmacy" data-bs-parent="#erdAccordion">
+            <div class="accordion-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-3">PHARMACY</dt>
+                <dd class="col-sm-9">
+                  Represents the single in-house pharmacy warehouse location.
+                  <ul class="small mt-1">
+                    <li>holds many PHARMACY_LICENSEs</li>
+                    <li>maintains many MEDICATION_INVENTORY records</li>
+                    <li>employs many PHARMACISTs</li>
+                    <li>employs many PHARMACY_TECHNICIANs</li>
+                    <li>processes many FULFILLMENTs</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PHARMACY_LICENSE</dt>
+                <dd class="col-sm-9">
+                  Details the licenses held by the pharmacy in different states.
+                  <ul class="small mt-1">
+                    <li>is held by one PHARMACY</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PHARMACIST</dt>
+                <dd class="col-sm-9">
+                  Represents a licensed pharmacist working at the in-house pharmacy.
+                  <ul class="small mt-1">
+                    <li>is employed by one PHARMACY</li>
+                    <li>verifies many FULFILLMENTs</li>
+                    <li>approves many PRESCRIPTION_REFILLs (implicitly via approved_by FK)</li>
+                  </ul>
+                </dd>
+                
+                <dt class="col-sm-3">PHARMACY_TECHNICIAN</dt>
+                <dd class="col-sm-9">
+                  Represents a pharmacy technician working at the in-house pharmacy.
+                  <ul class="small mt-1">
+                    <li>is employed by one PHARMACY</li>
+                    <li>prepares many FULFILLMENTs</li>
+                  </ul>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -137,7 +520,7 @@
   }
 
   function zoomIn() {
-    currentZoom = Math.min(currentZoom * 1.2, 10);
+    currentZoom = Math.min(currentZoom * 1.2, 20);
     updateTransform();
   }
 
