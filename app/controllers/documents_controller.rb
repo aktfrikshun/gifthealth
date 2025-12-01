@@ -25,8 +25,23 @@ class DocumentsController < ApplicationController
       return
     end
 
+    # Validate filename to prevent path traversal
+    # Only allow alphanumeric characters, hyphens, and underscores
+    unless doc_name.match?(/\A[a-zA-Z0-9_-]+\z/)
+      render plain: 'Invalid document name', status: :bad_request
+      return
+    end
+
     # Handle SVG files
     if format == 'svg'
+      # Whitelist allowed SVG files
+      allowed_svgs = %w[erd-diagram]
+
+      unless allowed_svgs.include?(doc_name)
+        render plain: 'SVG file not found', status: :not_found
+        return
+      end
+
       file_path = Rails.root.join('documents', "#{doc_name}.svg")
       if File.exist?(file_path)
         send_file file_path, type: 'image/svg+xml', disposition: 'inline'
